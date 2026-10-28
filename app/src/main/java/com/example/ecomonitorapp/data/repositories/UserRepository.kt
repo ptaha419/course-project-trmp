@@ -1,6 +1,5 @@
 package com.example.ecomonitorapp.data.repositories
 
-import android.R
 import android.content.Context
 import com.example.ecomonitorapp.data.dao.UserDao
 import com.example.ecomonitorapp.data.db.DbProvider
@@ -18,7 +17,7 @@ class UserRepository(private val context: Context) {
                              lastName: String,
                              phoneNumber: String,
                              passport: String,
-                             passwordHash: String?,
+                             passwordHash: String?
                              // на случай, если регистрация всегда как заявителя
                              // админ отдельно регистрирует другие роли
                              //role: UserRole = UserRole.APPLICANT
