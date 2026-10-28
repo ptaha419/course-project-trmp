@@ -18,9 +18,9 @@ class UserRepository(private val context: Context) {
                              phoneNumber: String,
                              passport: String,
                              passwordHash: String?
-                             // на случай, если регистрация всегда как заявителя
-                             // админ отдельно регистрирует другие роли
-                             //role: UserRole = UserRole.APPLICANT
+        // на случай, если регистрация всегда как заявителя
+        // админ отдельно регистрирует другие роли
+        //role: UserRole = UserRole.APPLICANT
     ) : Boolean {
         return try {
             val userEntity = UserEntity(

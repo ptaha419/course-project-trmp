@@ -20,7 +20,7 @@ interface UserDao {
         WHERE first_name LIKE :first AND last_name LIKE :last LIMIT 1
         """
     )
-    suspend fun findByName(first: String, last: String): UserEntity
+    suspend fun findByName(first: String, last: String): UserEntity? // вернём null, если ничего не найдётся
 
     @Insert
     suspend fun insertAll(vararg users: UserEntity)
@@ -31,8 +31,8 @@ interface UserDao {
     @Insert
     suspend fun insert(user: UserEntity)
 
-    @Query("SELECT * FROM user WHERE email = :email AND password = :password")
-    suspend fun login(email: String, password: String): UserEntity?
+//    @Query("SELECT * FROM user WHERE email = :email AND password = :password")
+//    suspend fun login(email: String, password: String): UserEntity?
 
     @Query("SELECT * FROM user WHERE email = :email")
     suspend fun getByEmail(email: String): UserEntity?
