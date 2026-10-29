@@ -5,16 +5,17 @@ plugins {
 
 android {
     namespace = "com.example.ecomonitorapp"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+//    compileSdk {
+//        version = release(36) {
+//            minorApiLevel = 1
+//        }
+//    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.ecomonitorapp"
-        minSdk = 36
-        targetSdk = 36
+        minSdk = 26 // 36
+        targetSdk = 34 // 36
         versionCode = 1
         versionName = "1.0"
 
@@ -46,6 +47,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
