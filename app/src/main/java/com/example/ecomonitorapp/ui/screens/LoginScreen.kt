@@ -29,50 +29,28 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecomonitorapp.ui.viewmodels.AuthViewModelFactory
 
 @Composable
-fun LoginScreen(
-    onSuccess: () -> Unit,
-    onToRegister: () -> Unit
-) {
-    val vm: AuthViewModel = viewModel(
-        factory = AuthViewModelFactory(LocalContext.current.applicationContext as Application)
-    )
+fun LoginScreen( vm: AuthViewModel = viewModel(),
+                 onToRegister: () -> Unit,
+                 onSuccess: () -> Unit) {
 
     val state by vm.stateFlow.collectAsStateWithLifecycle()
 
     when (state) {
-        is AuthState.Idle -> Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            LoginForm(
-                onLogin = { email, password ->
-                    vm.login(email, password)
-                }
-            )
+        is AuthState.Idle -> LoginForm(
+            onLogin = { email, password ->
+                vm.login(email, password)
+            },
+            onToRegister = onToRegister
+        )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = onToRegister,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Нет аккаунта? Зарегистрироваться")
-            }
-        }
-
-        is AuthState.Loading -> Box(
+        is AuthState.Loading -> Box (
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
         }
 
-        is AuthState.Success -> {
-            // переход на главный экран, state.user содержит данные пользователя
-            onSuccess()
-        }
+        is AuthState.Success -> onSuccess()
 
         is AuthState.Error -> AlertMessage(message = (state as AuthState.Error).message)
     }

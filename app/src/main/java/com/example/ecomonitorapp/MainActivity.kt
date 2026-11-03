@@ -7,10 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.ecomonitorapp.ui.theme.EcoMonitorAppTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,7 +15,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ecomonitorapp.ui.screens.HomeScreen
 import com.example.ecomonitorapp.ui.screens.LoginScreen
 import com.example.ecomonitorapp.ui.screens.RegisterScreen
-import androidx.compose.foundation.layout.PaddingValues
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,9 +27,18 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "login", // первый экран при запуске
+                        startDestination = "register", // первый экран при запуске
                         modifier = Modifier.padding(innerPadding)
                     ) {
+                        composable("register") {
+                            RegisterScreen(
+                                onSuccess = {
+                                    // переход на главный экран после успешной регистрации
+                                    navController.navigate("home")
+                                },
+                                onToLogin = { navController.navigate("login") }
+                            )
+                        }
                         composable("login") {
                             LoginScreen(
                                 onSuccess = {
@@ -41,14 +46,6 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("home")
                                 },
                                 onToRegister = { navController.navigate("register") }
-                            )
-                        }
-                        composable("register") {
-                            RegisterScreen(
-                                onSuccess = {
-                                    // Переход на главный экран после успешной регистрации
-                                    navController.navigate("home")
-                                }
                             )
                         }
                         composable("home") {

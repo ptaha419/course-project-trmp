@@ -1,12 +1,15 @@
 package com.example.ecomonitorapp.ui.forms
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,8 +20,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
@@ -31,7 +34,8 @@ fun RegisterForm(
         lastName: String,
         phoneNumber: String,
         passport: String,
-        password: String) -> Unit
+        password: String) -> Unit,
+    onToLogin: () -> Unit
 ) {
     // создание и сохранение объектов MutableState для отслеживания изменений их значений
     var email by remember { mutableStateOf("") }
@@ -163,6 +167,22 @@ fun RegisterForm(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Зарегистрироваться")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))  // отступ от кнопки
+        Row(horizontalArrangement = Arrangement.Center) {
+            Text(
+                text = "Уже есть аккаунт?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Войти",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { onToLogin() }
+            )
         }
 
         errMessage?.let { mes ->
