@@ -29,7 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecomonitorapp.ui.viewmodels.AuthViewModelFactory
 
 @Composable
-fun LoginScreen( vm: AuthViewModel = viewModel(),
+fun LoginScreen(vm: AuthViewModel = viewModel(),
                  onToRegister: () -> Unit,
                  onSuccess: () -> Unit) {
 

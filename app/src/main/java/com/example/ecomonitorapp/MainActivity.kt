@@ -49,7 +49,11 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("home") {
-                            HomeScreen()
+                            HomeScreen(
+                                onOpenAccount = { navController.navigate("account") },
+                                onOpenMap = { navController.navigate("map") },
+                                onOpenAppeal = { navController.navigate("appeal") }
+                            )
                         }
                     }
                 }

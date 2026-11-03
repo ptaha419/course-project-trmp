@@ -57,11 +57,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    val roomVersion = "2.8.5"
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-//    annotationProcessor("androidx.room:room-compiler:$roomVersion")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
 }
