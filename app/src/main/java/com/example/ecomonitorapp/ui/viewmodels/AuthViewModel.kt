@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 
 // класс с готовыми состояниями аутентификации,
 // которые изменяются в течение работы приложения
@@ -24,60 +25,48 @@ sealed class AuthState {
 // инициализация ViewModel и StateFlow
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = UserRepository(application.applicationContext)
-
-    // создание объекта StateFlow с нач. значением Idle
-    private val _stateFlow = MutableStateFlow<AuthState> (AuthState.Idle)
+    private val _stateFlow = MutableStateFlow<AuthState>(AuthState.Idle)
     val stateFlow = _stateFlow.asStateFlow()
 
-    fun register(email: String,
-                 firstName: String,
-                 middleName: String?,
-                 lastName: String,
-                 phoneNumber: String,
-                 passport: String,
-                 password: String) {
+    fun register(email: String, firstName: String, middleName: String?, lastName: String,
+                 phoneNumber: String, passport: String, password: String) {
         viewModelScope.launch {
-            // меняем состояние, идёт процесс регистрации
             _stateFlow.value = AuthState.Loading
-
             val passwordHash = hashPassword(password)
 
-            val success = repository.registerUser(email, firstName, middleName, lastName,
-                phoneNumber, passport, passwordHash)
+            // получаем существующего пользователя
+            val registeredUser = repository.registerUser(
+                email, firstName, middleName, lastName, phoneNumber, passport, passwordHash
+            )
 
-            if(success) {
-                // нужно изменить состояние на успешное
-                _stateFlow.value = AuthState.Success(
-                    User(
-                        id = null,
-                        email = email,
-                        firstName = firstName,
-                        middleName = middleName,
-                        lastName = lastName,
-                        phoneNumber = phoneNumber,
-                        passport = passport,
-                        role = UserRole.APPLICANT
-                    )
+            if (registeredUser != null) {
+                val domainUser = User(
+                    id = registeredUser.id!!, // используем реальный id, а не null
+                    email = registeredUser.email,
+                    firstName = registeredUser.firstName,
+                    middleName = registeredUser.middleName,
+                    lastName = registeredUser.lastName,
+                    phoneNumber = registeredUser.phoneNumber,
+                    passport = registeredUser.passport,
+                    role = parseRole(registeredUser.role)
                 )
+                _stateFlow.value = AuthState.Success(domainUser)
             } else {
-                _stateFlow.value = AuthState.Error("Не удалось зарегистрировать пользователя в системе!")
+                _stateFlow.value = AuthState.Error("Не удалось зарегистрировать пользователя!")
             }
-
         }
     }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _stateFlow.value = AuthState.Loading
-
             val storedUser = repository.loginUser(email)
 
-            // пользователь существует
-            if(storedUser != null) {
+            if (storedUser != null && storedUser.passwordHash != null) {
                 val inputHash = hashPassword(password)
-                if(inputHash == storedUser.passwordHash) {
+                if (inputHash == storedUser.passwordHash) {
                     val domainUser = User(
-                        id = storedUser.id,
+                        id = storedUser.id!!,
                         email = storedUser.email,
                         firstName = storedUser.firstName,
                         middleName = storedUser.middleName,
@@ -88,20 +77,25 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     _stateFlow.value = AuthState.Success(domainUser)
                 } else {
-                _stateFlow.value = AuthState.Error("Неверный пароль!")
+                    _stateFlow.value = AuthState.Error("Неверный пароль!")
                 }
             } else {
-                // иначе ошибка - пользователь не найден
-                _stateFlow.value = AuthState.Error("Пользователь не найден!")
-                }
+                _stateFlow.value = AuthState.Error("Пользователь не найден или ошибка данных!")
+            }
         }
     }
 }
 
 // функция для хэширования пароля методом SHA-256
 private fun hashPassword(password: String): String {
-    val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
-    return bytes.joinToString("") { "%02x".format(it) }
+    return try {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val bytes = digest.digest(password.toByteArray(Charsets.UTF_8))
+        bytes.joinToString("") { "%02x".format(it) }
+    } catch (e: NoSuchAlgorithmException) {
+        e.printStackTrace()
+        ""
+    }
 }
 
 // парсинг типа данных роли

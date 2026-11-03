@@ -1,5 +1,6 @@
 package com.example.ecomonitorapp.ui.screens
 
+import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -21,16 +22,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.ecomonitorapp.ui.forms.LoginForm
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ecomonitorapp.ui.viewmodels.AuthViewModelFactory
 
 @Composable
 fun LoginScreen(
-    vm: AuthViewModel = viewModel(),
     onSuccess: () -> Unit,
     onToRegister: () -> Unit
 ) {
+    val vm: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(LocalContext.current.applicationContext as Application)
+    )
+
     val state by vm.stateFlow.collectAsStateWithLifecycle()
 
     when (state) {
@@ -70,11 +76,4 @@ fun LoginScreen(
 
         is AuthState.Error -> AlertMessage(message = (state as AuthState.Error).message)
     }
-
-
-    Text(
-        text = "Нет аккаунта? Зарегистрироваться",
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.clickable { onToRegister() } // вызов перехода
-    )
 }

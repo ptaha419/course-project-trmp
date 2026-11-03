@@ -8,6 +8,9 @@ import com.example.ecomonitorapp.data.entities.UserEntity
 
 @Dao
 interface UserDao {
+    @Insert
+    suspend fun insert(user: UserEntity): Long
+
     @Query("SELECT * FROM user")
     suspend fun getAll(): List<UserEntity>
 
@@ -28,8 +31,8 @@ interface UserDao {
     @Delete
     suspend fun delete(user: UserEntity)
 
-    @Insert
-    suspend fun insert(user: UserEntity)
+//    @Insert
+//    suspend fun insert(user: UserEntity)
 
 //    @Query("SELECT * FROM user WHERE email = :email AND password = :password")
 //    suspend fun login(email: String, password: String): UserEntity?

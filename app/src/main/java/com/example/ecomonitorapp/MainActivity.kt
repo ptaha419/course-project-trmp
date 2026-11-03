@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ecomonitorapp.ui.screens.HomeScreen
 import com.example.ecomonitorapp.ui.screens.LoginScreen
 import com.example.ecomonitorapp.ui.screens.RegisterScreen
+import androidx.compose.foundation.layout.PaddingValues
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

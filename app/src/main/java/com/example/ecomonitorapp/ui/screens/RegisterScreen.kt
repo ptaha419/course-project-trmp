@@ -13,6 +13,8 @@ import com.example.ecomonitorapp.ui.forms.AlertMessage
 import com.example.ecomonitorapp.ui.forms.RegisterForm
 import com.example.ecomonitorapp.ui.viewmodels.AuthState
 import com.example.ecomonitorapp.ui.viewmodels.AuthViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ecomonitorapp.ui.viewmodels.AuthViewModelFactory
 
 @Composable
 fun RegisterScreen(vm: AuthViewModel = viewModel(),
