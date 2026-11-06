@@ -45,4 +45,14 @@ class UserRepository(private val context: Context) {
 
     // Авторизация пользователя
     suspend fun loginUser(email: String): UserEntity? = dao.getByEmail(email)
+
+    suspend fun getUserById(id: Int): UserEntity? = dao.getById(id)
+
+    suspend fun updateUser(user: UserEntity): Boolean = try {
+        dao.update(user)
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
 }

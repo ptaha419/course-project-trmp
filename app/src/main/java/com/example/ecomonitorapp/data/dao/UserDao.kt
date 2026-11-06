@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.example.ecomonitorapp.data.entities.UserEntity
 
 @Dao
@@ -39,4 +40,10 @@ interface UserDao {
 
     @Query("SELECT * FROM user WHERE email = :email")
     suspend fun getByEmail(email: String): UserEntity?
+
+    @Query("SELECT * FROM user WHERE id = :id")
+    suspend fun getById(id: Int): UserEntity?
+
+    @Update
+    suspend fun update(user: UserEntity)
 }
