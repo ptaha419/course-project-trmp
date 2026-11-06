@@ -55,4 +55,13 @@ class UserRepository(private val context: Context) {
         e.printStackTrace()
         false
     }
+
+    fun saveCurrentUserId(id: Int) {
+        context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+            .edit().putInt("current_user_id", id).apply()
+    }
+
+    fun getCurrentUserId(): Int =
+        context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+            .getInt("current_user_id", -1)
 }
