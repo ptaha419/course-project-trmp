@@ -1,4 +1,4 @@
-package com.example.ecomonitorapp.ui.viewmodels
+package com.example.ecomonitorapp.ui.viewmodels.account
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

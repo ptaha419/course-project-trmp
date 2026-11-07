@@ -1,4 +1,4 @@
-package com.example.ecomonitorapp.ui.screens
+package com.example.ecomonitorapp.ui.screens.account
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.models.UserRole
-import com.example.ecomonitorapp.ui.viewmodels.AccountState
-import com.example.ecomonitorapp.ui.viewmodels.AccountViewModel
+import com.example.ecomonitorapp.ui.viewmodels.account.AccountState
+import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 
 @Composable
 fun AccountScreen(

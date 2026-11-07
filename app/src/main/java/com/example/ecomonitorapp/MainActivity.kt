@@ -17,11 +17,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ecomonitorapp.data.repositories.UserRepository
-import com.example.ecomonitorapp.ui.screens.AccountScreen
+import com.example.ecomonitorapp.ui.screens.account.AccountScreen
 import com.example.ecomonitorapp.ui.screens.HomeScreen
-import com.example.ecomonitorapp.ui.screens.LoginScreen
-import com.example.ecomonitorapp.ui.screens.RegisterScreen
-import com.example.ecomonitorapp.ui.viewmodels.AccountViewModel
+import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
+import com.example.ecomonitorapp.ui.screens.auth.LoginScreen
+import com.example.ecomonitorapp.ui.screens.auth.RegisterScreen
+import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
+import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,13 +81,21 @@ class MainActivity : ComponentActivity() {
                             AccountScreen(
                                 vm = viewModel,
                                 userId = userId,
-                                onEditClick = { navController.navigate("editProfile/$userId") }
+                                onEditClick = { navController.navigate("editAccount/$userId") }
                             )
                         }
-
-                        composable("editProfile/{userId}") { backStackEntry ->
+                        composable(
+                            "editAccount/{userId}",
+                            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                        ) { backStackEntry ->
                             val userId = backStackEntry.arguments?.getInt("userId") ?: return@composable
-                            // здесь позже будет EditProfileScreen
+                            EditAccountScreen(
+                                userId = userId,
+                                onBack = { navController.popBackStack() },
+                                vm = viewModel(
+                                    factory = EditAccountViewModel.factory(LocalContext.current)
+                                )
+                            )
                         }
                     }
                 }

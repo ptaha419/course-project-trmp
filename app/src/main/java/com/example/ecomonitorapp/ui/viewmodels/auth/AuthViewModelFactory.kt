@@ -1,7 +1,6 @@
-package com.example.ecomonitorapp.ui.viewmodels
+package com.example.ecomonitorapp.ui.viewmodels.auth
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 

@@ -1,4 +1,4 @@
-package com.example.ecomonitorapp.ui.viewmodels
+package com.example.ecomonitorapp.ui.viewmodels.auth
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -7,7 +7,6 @@ import com.example.ecomonitorapp.data.repositories.UserRepository
 import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.models.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
