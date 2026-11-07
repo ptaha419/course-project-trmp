@@ -7,6 +7,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -17,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ecomonitorapp.data.repositories.UserRepository
+import com.example.ecomonitorapp.models.UserRole
 import com.example.ecomonitorapp.ui.screens.account.AccountScreen
 import com.example.ecomonitorapp.ui.screens.HomeScreen
 import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
@@ -62,14 +68,19 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("home") {
                             val userId = repository.getCurrentUserId()
+                            var userRole by remember { mutableStateOf<UserRole?>(null) }
+                            // getUserRole — suspend, пока роль не загрузится, экран покажет только
+                            // общие карточки, а потом - ролевые
+                            LaunchedEffect(userId) {
+                                userRole = repository.getUserRole(userId)
+                            }
                             HomeScreen(
-                                onOpenAccount = {
-                                    if (userId != -1L) navController.navigate("account/$userId")
-                                },
+                                userRole = userRole,
+                                onOpenAccount = { if (userId != -1L) navController.navigate("account/$userId") },
                                 onOpenMap = { navController.navigate("map") },
                                 onOpenAppeal = { navController.navigate("appeal") },
-                                onOpenListOfAppeals = { navController.navigate("listOfAppeals")},
-                                onOpenMyAppeals = { navController.navigate("myAppeals")}
+                                onOpenListOfAppeals = { navController.navigate("listOfAppeals") },
+                                onOpenMyAppeals = { navController.navigate("myAppeals") }
                             )
                         }
                         composable(

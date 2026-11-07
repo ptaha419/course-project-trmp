@@ -48,6 +48,13 @@ class UserRepository(private val context: Context) {
 
     suspend fun getUserById(id: Long): UserEntity? = dao.getById(id)
 
+    suspend fun getUserRole(userId: Long): UserRole? {
+        if (userId == -1L) return null // никто не залогинен
+
+        return dao.getById(userId)?.let { entity ->
+                UserRole.valueOf(entity.role)
+            }
+    }
     suspend fun updateUser(user: UserEntity): Boolean = try {
         dao.update(user)
         true

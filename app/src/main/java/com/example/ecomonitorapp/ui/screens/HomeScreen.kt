@@ -25,7 +25,7 @@ import com.example.ecomonitorapp.models.UserRole
 
 @Composable
 fun HomeScreen(
-//    userRole: UserRole?,
+    userRole: UserRole?,
     onOpenAccount: () -> Unit,
     onOpenMap: () -> Unit,
     onOpenAppeal: () -> Unit,
@@ -66,25 +66,25 @@ fun HomeScreen(
             onClick = onOpenAppeal,
             color = MaterialTheme.colorScheme.primaryContainer
         )
-//        if (userRole == UserRole.MODERATOR) {
-//            HomeCard(
-//                title = "Список заявок",
-//                description = "Просмотреть все поступившие заявки",
-//                icon = Icons.AutoMirrored.Filled.List,
-//                onClick = onOpenListOfAppeals,
-//                color = MaterialTheme.colorScheme.secondaryContainer
-//            )
-//        }
-//
-//        if (userRole == UserRole.APPLICANT) {
-//            HomeCard(
-//                title = "Список моих заявок",
-//                description = "Просмотреть мои отправленные заявки",
-//                icon = Icons.AutoMirrored.Filled.List,
-//                onClick = onOpenMyAppeals,
-//                color = MaterialTheme.colorScheme.secondaryContainer
-//            )
-//        }
+        if (userRole == UserRole.MODERATOR) {
+            HomeCard(
+                title = "Список заявок",
+                description = "Просмотреть все поступившие заявки",
+                icon = Icons.AutoMirrored.Filled.List,
+                onClick = onOpenListOfAppeals,
+                color = MaterialTheme.colorScheme.secondaryContainer
+            )
+        }
+
+        if (userRole == UserRole.APPLICANT) {
+            HomeCard(
+                title = "Список моих заявок",
+                description = "Просмотреть мои отправленные заявки",
+                icon = Icons.AutoMirrored.Filled.List,
+                onClick = onOpenMyAppeals,
+                color = MaterialTheme.colorScheme.secondaryContainer
+            )
+        }
     }
 }
 
