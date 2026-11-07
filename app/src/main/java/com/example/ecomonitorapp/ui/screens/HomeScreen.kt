@@ -28,9 +28,9 @@ fun HomeScreen(
     userRole: UserRole?,
     onOpenAccount: () -> Unit,
     onOpenMap: () -> Unit,
-    onOpenAppeal: () -> Unit,
-    onOpenListOfAppeals: () -> Unit,
-    onOpenMyAppeals: () -> Unit,
+    onOpenReport: () -> Unit,
+    onOpenListOfReports: () -> Unit,
+    onOpenMyReports: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -63,7 +63,7 @@ fun HomeScreen(
             title = "Новая заявка",
             description = "Сообщить об экологическом нарушении",
             icon = Icons.Filled.Add,
-            onClick = onOpenAppeal,
+            onClick = onOpenReport,
             color = MaterialTheme.colorScheme.primaryContainer
         )
         if (userRole == UserRole.MODERATOR) {
@@ -71,7 +71,7 @@ fun HomeScreen(
                 title = "Список заявок",
                 description = "Просмотреть все поступившие заявки",
                 icon = Icons.AutoMirrored.Filled.List,
-                onClick = onOpenListOfAppeals,
+                onClick = onOpenListOfReports,
                 color = MaterialTheme.colorScheme.secondaryContainer
             )
         }
@@ -81,7 +81,7 @@ fun HomeScreen(
                 title = "Список моих заявок",
                 description = "Просмотреть мои отправленные заявки",
                 icon = Icons.AutoMirrored.Filled.List,
-                onClick = onOpenMyAppeals,
+                onClick = onOpenMyReports,
                 color = MaterialTheme.colorScheme.secondaryContainer
             )
         }

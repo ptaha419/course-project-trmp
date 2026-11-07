@@ -78,9 +78,9 @@ class MainActivity : ComponentActivity() {
                                 userRole = userRole,
                                 onOpenAccount = { if (userId != -1L) navController.navigate("account/$userId") },
                                 onOpenMap = { navController.navigate("map") },
-                                onOpenAppeal = { navController.navigate("appeal") },
-                                onOpenListOfAppeals = { navController.navigate("listOfAppeals") },
-                                onOpenMyAppeals = { navController.navigate("myAppeals") }
+                                onOpenReport = { navController.navigate("report") },
+                                onOpenListOfReports = { navController.navigate("listOfReports") },
+                                onOpenMyReports = { navController.navigate("myReports") }
                             )
                         }
                         composable(
