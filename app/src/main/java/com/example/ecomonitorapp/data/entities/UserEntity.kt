@@ -7,7 +7,7 @@ import com.example.ecomonitorapp.models.UserRole
 
 @Entity(tableName = "user")
 data class UserEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int? = null,
+    @PrimaryKey(autoGenerate = true) val id: Long? = null,
     @ColumnInfo(name = "email") val email: String,
     @ColumnInfo(name = "first_name") val firstName: String,
     @ColumnInfo(name = "middle_name") val middleName: String?,

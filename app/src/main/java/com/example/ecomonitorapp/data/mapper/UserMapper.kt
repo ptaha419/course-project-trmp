@@ -8,7 +8,7 @@ import com.example.ecomonitorapp.models.UserRole
 // Маппинг реализуется функциями расширения toUser() и toEntity()
 
 fun UserEntity.toUser(): User = User(
-    id = id ?: -1, // страховка при создании пользователя
+    id = id ?: -1L, // страховка при создании пользователя
     email = email,
     firstName = firstName,
     middleName = middleName,

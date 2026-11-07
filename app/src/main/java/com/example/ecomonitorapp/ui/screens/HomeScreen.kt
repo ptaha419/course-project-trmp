@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -19,12 +21,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.ecomonitorapp.models.UserRole
 
 @Composable
 fun HomeScreen(
+//    userRole: UserRole?,
     onOpenAccount: () -> Unit,
     onOpenMap: () -> Unit,
-    onOpenAppeal: () -> Unit
+    onOpenAppeal: () -> Unit,
+    onOpenListOfAppeals: () -> Unit,
+    onOpenMyAppeals: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -46,7 +52,6 @@ fun HomeScreen(
             onClick = onOpenAccount,
             color = MaterialTheme.colorScheme.surfaceVariant
         )
-
         HomeCard(
             title = "Карта города",
             description = "Состояние экологии, точки мониторинга",
@@ -54,7 +59,6 @@ fun HomeScreen(
             onClick = onOpenMap,
             color = MaterialTheme.colorScheme.tertiaryContainer
         )
-
         HomeCard(
             title = "Новая заявка",
             description = "Сообщить об экологическом нарушении",
@@ -62,6 +66,25 @@ fun HomeScreen(
             onClick = onOpenAppeal,
             color = MaterialTheme.colorScheme.primaryContainer
         )
+//        if (userRole == UserRole.MODERATOR) {
+//            HomeCard(
+//                title = "Список заявок",
+//                description = "Просмотреть все поступившие заявки",
+//                icon = Icons.AutoMirrored.Filled.List,
+//                onClick = onOpenListOfAppeals,
+//                color = MaterialTheme.colorScheme.secondaryContainer
+//            )
+//        }
+//
+//        if (userRole == UserRole.APPLICANT) {
+//            HomeCard(
+//                title = "Список моих заявок",
+//                description = "Просмотреть мои отправленные заявки",
+//                icon = Icons.AutoMirrored.Filled.List,
+//                onClick = onOpenMyAppeals,
+//                color = MaterialTheme.colorScheme.secondaryContainer
+//            )
+//        }
     }
 }
 

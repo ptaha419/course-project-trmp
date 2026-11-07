@@ -29,7 +29,7 @@ import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 @Composable
 fun AccountScreen(
     vm: AccountViewModel,
-    userId: Int,
+    userId: Long,
     onEditClick: () -> Unit
 ) {
     LaunchedEffect(userId) {

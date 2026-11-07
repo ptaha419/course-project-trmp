@@ -64,17 +64,19 @@ class MainActivity : ComponentActivity() {
                             val userId = repository.getCurrentUserId()
                             HomeScreen(
                                 onOpenAccount = {
-                                    if (userId != -1) navController.navigate("account/$userId")
+                                    if (userId != -1L) navController.navigate("account/$userId")
                                 },
                                 onOpenMap = { navController.navigate("map") },
-                                onOpenAppeal = { navController.navigate("appeal") }
+                                onOpenAppeal = { navController.navigate("appeal") },
+                                onOpenListOfAppeals = { navController.navigate("listOfAppeals")},
+                                onOpenMyAppeals = { navController.navigate("myAppeals")}
                             )
                         }
                         composable(
                             "account/{userId}",
-                            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                            arguments = listOf(navArgument("userId") { type = NavType.LongType })
                         ) { backStackEntry ->
-                            val userId = backStackEntry.arguments?.getInt("userId") ?: return@composable
+                            val userId = backStackEntry.arguments?.getLong("userId") ?: return@composable
                             val viewModel: AccountViewModel = viewModel(
                                 factory = AccountViewModel.factory(LocalContext.current.applicationContext)
                             )
@@ -86,9 +88,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(
                             "editAccount/{userId}",
-                            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                            arguments = listOf(navArgument("userId") { type = NavType.LongType })
                         ) { backStackEntry ->
-                            val userId = backStackEntry.arguments?.getInt("userId") ?: return@composable
+                            val userId = backStackEntry.arguments?.getLong("userId") ?: return@composable
                             EditAccountScreen(
                                 userId = userId,
                                 onBack = { navController.popBackStack() },

@@ -38,7 +38,7 @@ import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
 @Composable
 fun EditAccountScreen(
     vm: EditAccountViewModel,
-    userId: Int,
+    userId: Long,
     onBack: () -> Unit,
 ) {
     LaunchedEffect(userId) { vm.loadUser(userId) }

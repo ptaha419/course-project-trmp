@@ -46,7 +46,7 @@ class UserRepository(private val context: Context) {
     // Авторизация пользователя
     suspend fun loginUser(email: String): UserEntity? = dao.getByEmail(email)
 
-    suspend fun getUserById(id: Int): UserEntity? = dao.getById(id)
+    suspend fun getUserById(id: Long): UserEntity? = dao.getById(id)
 
     suspend fun updateUser(user: UserEntity): Boolean = try {
         dao.update(user)
@@ -56,12 +56,12 @@ class UserRepository(private val context: Context) {
         false
     }
 
-    fun saveCurrentUserId(id: Int) {
+    fun saveCurrentUserId(id: Long) {
         context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            .edit().putInt("current_user_id", id).apply()
+            .edit().putLong("current_user_id", id).apply()
     }
 
-    fun getCurrentUserId(): Int =
+    fun getCurrentUserId(): Long =
         context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            .getInt("current_user_id", -1)
+            .getLong("current_user_id", -1L)
 }

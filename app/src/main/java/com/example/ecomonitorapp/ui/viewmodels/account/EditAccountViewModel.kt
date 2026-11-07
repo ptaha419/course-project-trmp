@@ -45,7 +45,7 @@ class EditAccountViewModel(private val repository: UserRepository) : ViewModel()
     private val _stateFlow = MutableStateFlow(EditAccountState())
     val stateFlow: StateFlow<EditAccountState> = _stateFlow.asStateFlow()
 
-    fun loadUser(id: Int) {
+    fun loadUser(id: Long) {
         viewModelScope.launch {
             val user = repository.getUserById(id)?.toUser()
             _stateFlow.value = if (user != null) EditAccountState(

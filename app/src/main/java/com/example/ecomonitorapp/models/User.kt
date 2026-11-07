@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 enum class UserRole {APPLICANT, MODERATOR, INSPECTOR}
 
 data class User(
-    val id: Int,
+    val id: Long,
     val email: String,
     val firstName: String,
     val middleName: String?,

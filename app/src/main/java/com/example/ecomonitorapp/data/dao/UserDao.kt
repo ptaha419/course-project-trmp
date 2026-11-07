@@ -16,7 +16,7 @@ interface UserDao {
     suspend fun getAll(): List<UserEntity>
 
     @Query("SELECT * FROM user WHERE id IN (:userIds)")
-    suspend fun loadAllByIds(userIds: IntArray): List<UserEntity>
+    suspend fun loadAllByIds(userIds: LongArray): List<UserEntity>
 
     @Query(
         """
@@ -42,7 +42,7 @@ interface UserDao {
     suspend fun getByEmail(email: String): UserEntity?
 
     @Query("SELECT * FROM user WHERE id = :id")
-    suspend fun getById(id: Int): UserEntity?
+    suspend fun getById(id: Long): UserEntity?
 
     @Update
     suspend fun update(user: UserEntity)

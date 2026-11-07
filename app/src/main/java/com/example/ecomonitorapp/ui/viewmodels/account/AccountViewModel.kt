@@ -24,7 +24,7 @@ class AccountViewModel(private val repository: UserRepository) : ViewModel() {
     private val _stateFlow = MutableStateFlow<AccountState>(AccountState.Loading)
     val stateFlow: StateFlow<AccountState> = _stateFlow.asStateFlow()
 
-    fun loadUser(id: Int) {
+    fun loadUser(id: Long) {
         viewModelScope.launch {
             _stateFlow.value = AccountState.Loading
             val found = repository.getUserById(id)?.toUser()
