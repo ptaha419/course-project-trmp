@@ -84,6 +84,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun reset() {
+        _stateFlow.value = AuthState.Idle
+    }
 }
 
 // функция для хэширования пароля методом SHA-256

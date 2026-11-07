@@ -10,10 +10,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import com.example.ecomonitorapp.ui.theme.EcoMonitorAppTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.ecomonitorapp.data.repositories.UserRepository
 import com.example.ecomonitorapp.ui.screens.AccountScreen
 import com.example.ecomonitorapp.ui.screens.HomeScreen
@@ -38,7 +40,8 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("register") {
                             RegisterScreen(
-                                onSuccess = {
+                                onSuccess = { user ->
+                                    repository.saveCurrentUserId(user.id)
                                     // переход на главный экран после успешной регистрации
                                     navController.navigate("home")
                                 },
@@ -47,7 +50,8 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("login") {
                             LoginScreen(
-                                onSuccess = {
+                                onSuccess = { user ->
+                                    repository.saveCurrentUserId(user.id)
                                     // переход на главный экран после авторизации
                                     navController.navigate("home")
                                 },
@@ -64,10 +68,13 @@ class MainActivity : ComponentActivity() {
                                 onOpenAppeal = { navController.navigate("appeal") }
                             )
                         }
-                        composable("account/{userId}") { backStackEntry ->
+                        composable(
+                            "account/{userId}",
+                            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                        ) { backStackEntry ->
                             val userId = backStackEntry.arguments?.getInt("userId") ?: return@composable
                             val viewModel: AccountViewModel = viewModel(
-                                factory = AccountViewModel.factory(LocalContext.current)
+                                factory = AccountViewModel.factory(LocalContext.current.applicationContext)
                             )
                             AccountScreen(
                                 vm = viewModel,

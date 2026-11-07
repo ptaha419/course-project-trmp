@@ -14,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.ui.forms.AlertMessage
 import com.example.ecomonitorapp.ui.forms.RegisterForm
 import com.example.ecomonitorapp.ui.viewmodels.AuthState
@@ -29,11 +31,19 @@ import com.example.ecomonitorapp.ui.viewmodels.AuthViewModel
 @Composable
 fun RegisterScreen(vm: AuthViewModel = viewModel(),
                    onToLogin: () -> Unit,
-                   onSuccess: () -> Unit) {
+                   onSuccess: (User) -> Unit) {
 
     val state by vm.stateFlow.collectAsStateWithLifecycle()
 
-    when(state) {
+    LaunchedEffect(state) {
+        if (state is AuthState.Success) {
+            val user = (state as AuthState.Success).user
+            vm.reset() // сначала сброс, чтобы onSuccess не сработал повторно
+            onSuccess(user)
+        }
+    }
+
+    when (state) {
         is AuthState.Idle -> RegisterForm(
             onRegister = { email, firstName, middleName, lastName, phoneNumber, passport, password ->
                 vm.register(
@@ -49,14 +59,14 @@ fun RegisterScreen(vm: AuthViewModel = viewModel(),
             onToLogin = onToLogin
         )
 
-        is AuthState.Loading -> Box (
+        is AuthState.Loading -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
         }
 
-        is AuthState.Success -> onSuccess()
+        is AuthState.Success -> { /* обрабатывается в LaunchedEffect */ }
 
         is AuthState.Error -> AlertMessage(message = (state as AuthState.Error).message)
     }

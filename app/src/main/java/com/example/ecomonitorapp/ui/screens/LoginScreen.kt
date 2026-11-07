@@ -22,18 +22,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.ecomonitorapp.ui.forms.LoginForm
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.ui.viewmodels.AuthViewModelFactory
 
 @Composable
 fun LoginScreen(vm: AuthViewModel = viewModel(),
                  onToRegister: () -> Unit,
-                 onSuccess: () -> Unit) {
+                 onSuccess: (User) -> Unit) {
 
     val state by vm.stateFlow.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state) {
+        if (state is AuthState.Success) {
+            val user = (state as AuthState.Success).user
+            vm.reset()
+            onSuccess(user)
+        }
+    }
 
     when (state) {
         is AuthState.Idle -> LoginForm(
@@ -43,14 +53,14 @@ fun LoginScreen(vm: AuthViewModel = viewModel(),
             onToRegister = onToRegister
         )
 
-        is AuthState.Loading -> Box (
+        is AuthState.Loading -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
         }
 
-        is AuthState.Success -> onSuccess()
+        is AuthState.Success -> { /* обрабатывается в LaunchedEffect */ }
 
         is AuthState.Error -> AlertMessage(message = (state as AuthState.Error).message)
     }

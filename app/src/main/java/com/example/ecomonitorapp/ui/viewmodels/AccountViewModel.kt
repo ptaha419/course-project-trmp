@@ -14,13 +14,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+sealed interface AccountState {
+    data object Loading : AccountState
+    data class Loaded(val user: User) : AccountState
+    data object NotFound : AccountState
+}
+
 class AccountViewModel(private val repository: UserRepository) : ViewModel() {
-    private val _user = MutableStateFlow<User?>(null)
-    val user: StateFlow<User?> = _user.asStateFlow()
+    private val _stateFlow = MutableStateFlow<AccountState>(AccountState.Loading)
+    val stateFlow: StateFlow<AccountState> = _stateFlow.asStateFlow()
 
     fun loadUser(id: Int) {
         viewModelScope.launch {
-            _user.value = repository.getUserById(id)?.toUser()
+            _stateFlow.value = AccountState.Loading
+            val found = repository.getUserById(id)?.toUser()
+            _stateFlow.value = if (found != null) AccountState.Loaded(found)
+            else AccountState.NotFound
         }
     }
 
@@ -29,7 +38,7 @@ class AccountViewModel(private val repository: UserRepository) : ViewModel() {
             val entity = repository.getUserById(user.id)
             if (entity != null) {
                 repository.updateUser(user.toEntity(existing = entity))
-                _user.value = user
+                _stateFlow.value = AccountState.Loaded(user)
             }
             onDone()
         }
@@ -42,5 +51,4 @@ class AccountViewModel(private val repository: UserRepository) : ViewModel() {
             }
         }
     }
-
 }

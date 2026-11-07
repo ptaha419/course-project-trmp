@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.models.UserRole
+import com.example.ecomonitorapp.ui.viewmodels.AccountState
 import com.example.ecomonitorapp.ui.viewmodels.AccountViewModel
 
 @Composable
@@ -35,13 +36,22 @@ fun AccountScreen(
         vm.loadUser(userId)
     }
 
-    val user by vm.user.collectAsStateWithLifecycle()
+    val state by vm.stateFlow.collectAsStateWithLifecycle()
 
-    when (val u = user) {
-        null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    when (val s = state) {
+        AccountState.Loading -> Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) { CircularProgressIndicator() }
+
+        is AccountState.Loaded -> AccountContent(user = s.user, onEditClick = onEditClick)
+
+        AccountState.NotFound -> Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Профиль не найден")
         }
-        else -> AccountContent(user = u, onEditClick = onEditClick)
     }
 }
 
