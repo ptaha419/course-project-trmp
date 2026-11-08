@@ -67,4 +67,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
+
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("androidx.activity:activity-ktx:1.9.3")
 }
