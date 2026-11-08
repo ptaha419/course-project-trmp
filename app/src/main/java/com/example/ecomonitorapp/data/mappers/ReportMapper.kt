@@ -1,7 +1,7 @@
 package com.example.ecomonitorapp.data.mappers
 
 import com.example.ecomonitorapp.data.entities.ReportEntity
-import com.example.ecomonitorapp.data.helper.GeoLoc
+import com.example.ecomonitorapp.data.managers.GeoLoc
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ViolationType

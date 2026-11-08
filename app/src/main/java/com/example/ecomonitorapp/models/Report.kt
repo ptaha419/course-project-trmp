@@ -1,6 +1,6 @@
 package com.example.ecomonitorapp.models
 
-import com.example.ecomonitorapp.data.helper.GeoLoc
+import com.example.ecomonitorapp.data.managers.GeoLoc
 import kotlinx.datetime.LocalDateTime
 
 enum class ViolationType { NOT_SELECTED, DUMP_OVERFLOW, UNAUTHORIZED_DUMP,  FIRE, WATER_POLLUTION}

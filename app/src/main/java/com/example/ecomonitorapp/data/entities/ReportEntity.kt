@@ -2,11 +2,22 @@ package com.example.ecomonitorapp.data.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ViolationType
 
-@Entity(tableName = "report")
+@Entity(tableName = "report",
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["reported_by"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("reported_by")])
 data class ReportEntity(
     @PrimaryKey(autoGenerate = true) val id: Long? = null,
     @ColumnInfo(name = "violation_type") val violationType: String = ViolationType.NOT_SELECTED.name,
