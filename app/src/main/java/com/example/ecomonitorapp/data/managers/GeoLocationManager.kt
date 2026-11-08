@@ -1,23 +1,10 @@
-package com.example.ecomonitorapp.data.helper
-
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.os.Build
-import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-
-import android.widget.Toast
-import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
-import kotlinx.coroutines.launch
+package com.example.ecomonitorapp.data.managers
 
 
 // Класс для сохранения координат для геотега
-//data class GeoLoc(val latitude: Double, val longitude: Double)
-//
-//class GeoLocationHelper {
+data class GeoLoc(val latitude: Double, val longitude: Double)
+
+//class GeoLocationManager {
 //    private var curLat: Double? = null // широта
 //    private var curLong: Double? = null // долгота
 //
