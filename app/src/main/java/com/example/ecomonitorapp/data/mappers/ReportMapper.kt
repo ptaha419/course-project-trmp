@@ -10,6 +10,16 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
+// функция-расширение: при определённом значении violationType
+// выбирается определённый reportPriority
+fun ViolationType.toPriority(): ReportPriority = when (this) {
+    ViolationType.NOT_SELECTED -> ReportPriority.NOT_SELECTED
+    ViolationType.DUMP_OVERFLOW -> ReportPriority.LOW
+    ViolationType.UNAUTHORIZED_DUMP -> ReportPriority.MEDIUM
+    ViolationType.FIRE -> ReportPriority.HIGH
+    ViolationType.WATER_POLLUTION -> ReportPriority.MEDIUM
+}
+
 fun ReportEntity.toDomain(): Report = Report(
     id = id ?: 0L,
     violationType = violationType.let { runCatching { ViolationType.valueOf(it) }.getOrDefault(ViolationType.NOT_SELECTED) },
