@@ -1,8 +1,29 @@
 package com.example.ecomonitorapp.data.managers
 
+import android.annotation.SuppressLint
+import android.content.Context
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
+import kotlinx.coroutines.tasks.await
 
 // Класс для сохранения координат для геотега
 data class GeoLoc(val latitude: Double, val longitude: Double)
+
+object GeoLocationManager {
+    @SuppressLint("MissingPermission")
+    suspend fun getCurrentLocation(context: Context): GeoLoc? {
+        val client = LocationServices.getFusedLocationProviderClient(context)
+        return try {
+            client.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                CancellationTokenSource().token
+            ).await()?.let { GeoLoc(it.latitude, it.longitude) }
+        } catch (e: Exception) {
+            null
+        }
+    }
+}
 
 //class GeoLocationManager {
 //    private var curLat: Double? = null // широта

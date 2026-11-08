@@ -28,7 +28,7 @@ fun HomeScreen(
     userRole: UserRole?,
     onOpenAccount: () -> Unit,
     onOpenMap: () -> Unit,
-    onOpenReport: () -> Unit,
+    onCreateReport: () -> Unit,
     onOpenListOfReports: () -> Unit,
     onOpenMyReports: () -> Unit,
 ) {
@@ -60,16 +60,16 @@ fun HomeScreen(
             color = MaterialTheme.colorScheme.tertiaryContainer
         )
         HomeCard(
-            title = "Новая заявка",
+            title = "Новое обращение",
             description = "Сообщить об экологическом нарушении",
             icon = Icons.Filled.Add,
-            onClick = onOpenReport,
+            onClick = onCreateReport,
             color = MaterialTheme.colorScheme.primaryContainer
         )
         if (userRole == UserRole.MODERATOR) {
             HomeCard(
-                title = "Список заявок",
-                description = "Просмотреть все поступившие заявки",
+                title = "Список обращений",
+                description = "Просмотреть все поступившие обращения",
                 icon = Icons.AutoMirrored.Filled.List,
                 onClick = onOpenListOfReports,
                 color = MaterialTheme.colorScheme.secondaryContainer
@@ -78,8 +78,8 @@ fun HomeScreen(
 
         if (userRole == UserRole.APPLICANT) {
             HomeCard(
-                title = "Список моих заявок",
-                description = "Просмотреть мои отправленные заявки",
+                title = "Список моих обращений",
+                description = "Просмотреть мои отправленные обращения",
                 icon = Icons.AutoMirrored.Filled.List,
                 onClick = onOpenMyReports,
                 color = MaterialTheme.colorScheme.secondaryContainer

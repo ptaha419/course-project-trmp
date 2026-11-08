@@ -28,8 +28,11 @@ import com.example.ecomonitorapp.ui.screens.HomeScreen
 import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
 import com.example.ecomonitorapp.ui.screens.auth.LoginScreen
 import com.example.ecomonitorapp.ui.screens.auth.RegisterScreen
+import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
 import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
+import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
+import com.example.ecomonitorapp.ui.screens.StubScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +81,7 @@ class MainActivity : ComponentActivity() {
                                 userRole = userRole,
                                 onOpenAccount = { if (userId != -1L) navController.navigate("account/$userId") },
                                 onOpenMap = { navController.navigate("map") },
-                                onOpenReport = { navController.navigate("report") },
+                                onCreateReport = { navController.navigate("report") },
                                 onOpenListOfReports = { navController.navigate("listOfReports") },
                                 onOpenMyReports = { navController.navigate("myReports") }
                             )
@@ -108,6 +111,32 @@ class MainActivity : ComponentActivity() {
                                 vm = viewModel(
                                     factory = EditAccountViewModel.factory(LocalContext.current)
                                 )
+                            )
+                        }
+                        composable("report") {
+                            ReportScreen(
+                                vm = viewModel(
+                                    factory = ReportViewModel.factory(LocalContext.current)
+                                ),
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("map") {
+                            StubScreen(
+                                "Карта",
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("listOfReports") {
+                            StubScreen(
+                                "Обращения",
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("myReports") {
+                            StubScreen(
+                                "Мои обращения",
+                                onBack = { navController.popBackStack() }
                             )
                         }
                     }
