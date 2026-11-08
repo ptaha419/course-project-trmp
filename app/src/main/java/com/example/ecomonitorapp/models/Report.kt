@@ -11,7 +11,6 @@ data class Report (
     val violationType: ViolationType = ViolationType.NOT_SELECTED,
     val description: String,
     val geoLoc: GeoLoc,
-    val districtId: Long,
     val photo: String?,
     val reportPriority: ReportPriority = ReportPriority.NOT_SELECTED,
     val createdAt: LocalDateTime,

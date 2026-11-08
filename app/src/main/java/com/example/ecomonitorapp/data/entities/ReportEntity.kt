@@ -13,7 +13,6 @@ data class ReportEntity(
     @ColumnInfo(name = "description") val description: String,
     @ColumnInfo(name = "latitude") val latitude: Double,
     @ColumnInfo(name = "longitude") val longitude: Double,
-    @ColumnInfo(name = "district_id") val districtId: Long,
     @ColumnInfo(name = "photo") val photo: String?,
     @ColumnInfo(name = "report_priority") val reportPriority: String = ReportPriority.NOT_SELECTED.name,
     @ColumnInfo(name = "created_at") val createdAt: Long,
