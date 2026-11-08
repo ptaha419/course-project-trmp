@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.ecomonitorapp.models.Priority
 import com.example.ecomonitorapp.models.ViolationType
+import kotlinx.datetime.LocalDateTime
 
 @Entity(tableName = "report")
 data class ReportEntity(

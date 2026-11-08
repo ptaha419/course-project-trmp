@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.ecomonitorapp.data.mapper.toEntity
-import com.example.ecomonitorapp.data.mapper.toUser
+import com.example.ecomonitorapp.data.mappers.toEntity
+import com.example.ecomonitorapp.data.mappers.toUser
 import com.example.ecomonitorapp.data.repositories.UserRepository
 import com.example.ecomonitorapp.models.User
 import kotlinx.coroutines.flow.MutableStateFlow

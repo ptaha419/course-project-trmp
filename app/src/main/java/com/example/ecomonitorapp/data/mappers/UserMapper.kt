@@ -1,4 +1,4 @@
-package com.example.ecomonitorapp.data.mapper
+package com.example.ecomonitorapp.data.mappers
 
 import com.example.ecomonitorapp.data.entities.UserEntity
 import com.example.ecomonitorapp.models.User

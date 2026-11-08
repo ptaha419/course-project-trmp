@@ -1,6 +1,6 @@
 package com.example.ecomonitorapp.models
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 enum class ViolationType { NOT_SELECTED, DUMP_OVERFLOW, UNAUTHORIZED_DUMP,  FIRE, WATER_POLLUTION}
 enum class Priority { NOT_SELECTED, HIGH, MEDIUM, LOW}
