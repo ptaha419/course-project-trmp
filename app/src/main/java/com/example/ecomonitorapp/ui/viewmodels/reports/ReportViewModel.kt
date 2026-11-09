@@ -56,6 +56,10 @@ class ReportViewModel(
 
     private val editingDraftId = MutableStateFlow<Long?>(null)
 
+
+    private val _draftSaved = MutableStateFlow(false)
+    val draftSaved = _draftSaved.asStateFlow()
+
     fun onViolationTypeChange(raw: String?) {
         _formFlow.update { it.copy(violationType = parseViolationType(raw)) }
     }
@@ -86,6 +90,7 @@ class ReportViewModel(
             editingDraftId.value = newId
         }
         _stateFlow.value = ReportState.DraftSaved
+        _draftSaved.value = true
     }
 
     fun loadDraft(id: Long) = viewModelScope.launch {
@@ -128,6 +133,10 @@ class ReportViewModel(
                 ReportState.Error("Не удалось создать обращение!")
             }
         }
+    }
+
+    fun resetDraftSaved() {
+        _draftSaved.value = false
     }
 
     companion object {
