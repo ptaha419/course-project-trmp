@@ -1,5 +1,6 @@
 package com.example.ecomonitorapp.ui.forms
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -30,9 +32,15 @@ fun LoginForm(
     onLogin: (email: String, password: String) -> Unit,
     onToRegister: () -> Unit
     ) {
+    val context = LocalContext.current
     // создание и сохранение объектов MutableState для отслеживания изменений их значений
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val prefs = remember { context.getSharedPreferences("auth", Context.MODE_PRIVATE) }
+
+    var email by remember { mutableStateOf(prefs.getString("saved_login", "") ?: "") }
+    var password by remember { mutableStateOf(prefs.getString("saved_password", "") ?: "") }
+
+    // переменная для "запоминания" пользователя при следующем входе
+    var rememberMe by remember { mutableStateOf(prefs.getBoolean("remember", false)) }
 
     var errMessage by remember {mutableStateOf<String?>(null)}
 
@@ -47,6 +55,16 @@ fun LoginForm(
         if (password.length < 8) {
             errMessage = "Пароль должен быть не короче 8 символов"
             return
+        }
+
+        if (rememberMe) {
+            prefs.edit()
+                .putBoolean("remember", true)
+                .putString("saved_login", email)
+                .putString("saved_password", password)
+                .apply()
+        } else {
+            prefs.edit().clear().apply() // или удалить только эти ключи
         }
 
         // если все проверки пройдены, то передаём данные в ViewModel
@@ -80,6 +98,16 @@ fun LoginForm(
             visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
             singleLine = true
         )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { rememberMe = !rememberMe },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(checked = rememberMe, onCheckedChange = { rememberMe = it })
+            Text("Запомнить меня")
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
