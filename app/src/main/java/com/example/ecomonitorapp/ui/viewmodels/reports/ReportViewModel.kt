@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.ecomonitorapp.data.managers.GeoLoc
 import com.example.ecomonitorapp.data.managers.SessionManager
+import com.example.ecomonitorapp.data.mappers.toPriority
 import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
@@ -29,14 +30,12 @@ data class ReportForm(
     val description: String = "",
     val geoLoc: GeoLoc? = null,
     val photo: String? = null,
-    val reportPriority: ReportPriority = ReportPriority.NOT_SELECTED,
 ) {
     val isDescriptionValid: Boolean
         get() = description.trim().length >= 10
 
     val canSubmit: Boolean
         get() = violationType != ViolationType.NOT_SELECTED &&
-                reportPriority != ReportPriority.NOT_SELECTED &&
                 isDescriptionValid &&
                 geoLoc != null
 }
@@ -53,10 +52,6 @@ class ReportViewModel(
 
     fun onViolationTypeChange(raw: String?) {
         _formFlow.update { it.copy(violationType = parseViolationType(raw)) }
-    }
-
-    fun onReportPriorityChange(raw: String?) {
-        _formFlow.update { it.copy(reportPriority = parseReportPriority(raw)) }
     }
 
     fun onDescriptionChange(value: String) {
@@ -83,7 +78,7 @@ class ReportViewModel(
                 description = form.description.trim(),
                 geoLoc = form.geoLoc ?: return@launch,
                 photo = form.photo,
-                reportPriority = form.reportPriority
+                reportPriority = form.violationType.toPriority() // автоматический выбор приоритета
             )
 
             _stateFlow.value = if (created != null) {

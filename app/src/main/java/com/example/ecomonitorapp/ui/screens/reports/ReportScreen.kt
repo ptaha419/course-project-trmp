@@ -16,6 +16,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +45,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.data.managers.GeoLocationManager
+import com.example.ecomonitorapp.data.mappers.toPriority
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ViolationType
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportForm
@@ -111,6 +115,19 @@ private fun ReportForm(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        if (form.violationType != ViolationType.NOT_SELECTED) {
+            FilterChip(
+                selected = true,
+                onClick = { },
+                label = { Text(form.violationType.toPriority().displayName) }
+            )
+        }
+        Text(
+            text = "Приоритет обращения определяется автоматически по выбранному типу нарушения",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         Text("Тип нарушения", style = MaterialTheme.typography.titleSmall)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ViolationType.entries.filter { it != ViolationType.NOT_SELECTED }.forEach { type ->
@@ -136,17 +153,6 @@ private fun ReportForm(
             minLines = 3,
             modifier = Modifier.fillMaxWidth()
         )
-
-        Text("Приоритет", style = MaterialTheme.typography.titleSmall)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ReportPriority.entries.filter { it != ReportPriority.NOT_SELECTED }.forEach { priority ->
-                FilterChip(
-                    selected = form.reportPriority == priority,
-                    onClick = { vm.onReportPriorityChange(priority.name) },
-                    label = { Text(priority.displayName) }
-                )
-            }
-        }
 
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
@@ -180,9 +186,7 @@ private fun ReportForm(
 
         Button(
             onClick = vm::submit,
-            enabled = form.violationType != ViolationType.NOT_SELECTED &&
-                    form.description.length >= 10 &&
-                    form.geoLoc != null,
+            enabled = form.canSubmit, // проверка отправки
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Отправить")
