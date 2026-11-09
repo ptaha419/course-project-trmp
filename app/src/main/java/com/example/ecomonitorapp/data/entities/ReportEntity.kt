@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.ecomonitorapp.models.ReportPriority
+import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.ViolationType
 
 @Entity(tableName = "report",
@@ -27,5 +28,6 @@ data class ReportEntity(
     @ColumnInfo(name = "photo") val photo: String?,
     @ColumnInfo(name = "report_priority") val reportPriority: String = ReportPriority.NOT_SELECTED.name,
     @ColumnInfo(name = "created_at") val createdAt: Long,
-    @ColumnInfo(name = "reported_by") val reportedBy: Long
+    @ColumnInfo(name = "reported_by") val reportedBy: Long,
+    @ColumnInfo(name = "status") val status: String = ReportStatus.SENT.name,
 )

@@ -17,6 +17,11 @@ enum class ReportPriority(val displayName: String) {
     NOT_SELECTED("Не выбран")
 }
 
+enum class ReportStatus(val displayName: String) {
+    DRAFT("Черновик"),
+    SENT("Отправлено")
+}
+
 data class Report (
     val id: Long,
     val violationType: ViolationType = ViolationType.NOT_SELECTED,
@@ -25,5 +30,6 @@ data class Report (
     val photo: String?,
     val reportPriority: ReportPriority = ReportPriority.NOT_SELECTED,
     val createdAt: LocalDateTime,
-    val reportedBy: Long
+    val reportedBy: Long,
+    val status: ReportStatus = ReportStatus.SENT
 )
