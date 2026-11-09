@@ -63,7 +63,7 @@ fun HomeScreen(
             )
         }
 
-        if (userRole == UserRole.APPLICANT) {
+        if (userRole == UserRole.APPLICANT || userRole == UserRole.MODERATOR) {
             HomeCard(
                 title = "Список моих обращений",
                 description = "Просмотреть мои отправленные обращения",
