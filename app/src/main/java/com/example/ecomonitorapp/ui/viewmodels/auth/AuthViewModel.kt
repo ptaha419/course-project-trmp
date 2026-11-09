@@ -74,6 +74,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         passport = storedUser.passport,
                         role = parseRole(storedUser.role)
                     )
+                    repository.saveCurrentUserId(storedUser.id!!)
                     _stateFlow.value = AuthState.Success(domainUser)
                 } else {
                     _stateFlow.value = AuthState.Error("Неверный пароль!")

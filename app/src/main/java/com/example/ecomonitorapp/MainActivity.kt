@@ -52,10 +52,9 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("register") {
                             RegisterScreen(
-                                onSuccess = { user ->
-                                    repository.saveCurrentUserId(user.id)
+                                onSuccess = {
                                     navController.navigate("main") {
-                                        popUpTo("login") { inclusive = true } // чтобы «назад» не возвращал на логин
+                                        popUpTo("register") { inclusive = true }
                                     }
                                 },
                                 onToLogin = { navController.navigate("login") }
@@ -63,8 +62,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("login") {
                             LoginScreen(
-                                onSuccess = { user ->
-                                    repository.saveCurrentUserId(user.id)
+                                onSuccess = {
                                     navController.navigate("main") {
                                         popUpTo("login") { inclusive = true }
                                     }

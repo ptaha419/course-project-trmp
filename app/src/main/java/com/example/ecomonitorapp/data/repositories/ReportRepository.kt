@@ -1,7 +1,9 @@
 package com.example.ecomonitorapp.data.repositories
 
 import android.content.Context
+import android.util.Log
 import com.example.ecomonitorapp.data.dao.ReportDao
+import com.example.ecomonitorapp.data.dao.UserDao
 import com.example.ecomonitorapp.data.db.DbProvider
 import com.example.ecomonitorapp.data.entities.ReportEntity
 import com.example.ecomonitorapp.data.managers.GeoLoc
@@ -19,6 +21,7 @@ class ReportRepository(private val context: Context,
                        private val session: SessionManager
 ) {
     private val dao: ReportDao = DbProvider.getDatabase(context).reportDao()
+    private val userDao: UserDao = DbProvider.getDatabase(context).userDao()
 
     suspend fun createReport(
         violationType: ViolationType,
@@ -42,6 +45,10 @@ class ReportRepository(private val context: Context,
             val newId = dao.insert(entity)
             entity.copy(id = newId).toDomainOrNull() ?: error("geoLoc не null")
         } catch (e: Exception) {
+            Log.d("CreateReport", "reportedBy = ${entity.reportedBy}")
+            val userExists = userDao.getById(entity.reportedBy) != null
+            Log.d("CreateReport", "user exists in DB: $userExists")
+            Log.e("CreateReport", "createReport failed", e)
             e.printStackTrace()
             null
         }

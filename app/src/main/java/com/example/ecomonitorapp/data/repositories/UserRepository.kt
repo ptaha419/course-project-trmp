@@ -1,13 +1,16 @@
 package com.example.ecomonitorapp.data.repositories
 
 import android.content.Context
+import android.util.Log
 import com.example.ecomonitorapp.data.dao.UserDao
 import com.example.ecomonitorapp.data.db.AppDatabase
 import com.example.ecomonitorapp.data.db.DbProvider
 import com.example.ecomonitorapp.data.entities.UserEntity
+import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.models.UserRole
 
 class UserRepository(private val context: Context) {
+    private val session = SessionManager(context)
     private val dao: UserDao = DbProvider.getDatabase(context).userDao()
 
     suspend fun registerUser(
@@ -35,8 +38,8 @@ class UserRepository(private val context: Context) {
             // получаем id, который сгенерировала БД
             val newId = dao.insert(userEntity)
 
-            // делаем SELECT, чтобы получить объект с реальным id из БД
-            dao.getByEmail(email)
+            // получаем объект с реальным id из БД, и сохраняем сессию
+            dao.getByEmail(email)?.also { saveCurrentUserId(it.id!!) }
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -64,11 +67,18 @@ class UserRepository(private val context: Context) {
     }
 
     fun saveCurrentUserId(id: Long) {
-        context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            .edit().putLong("current_user_id", id).apply()
+        Log.d("Session", "saveCurrentUserId: $id")
+        session.currentUserId = id
     }
 
-    fun getCurrentUserId(): Long =
-        context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            .getLong("current_user_id", -1L)
+    fun getCurrentUserId(): Long = session.currentUserId
+
+//    fun saveCurrentUserId(id: Long) {
+//        context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+//            .edit().putLong("current_user_id", id).apply()
+//    }
+//
+//    fun getCurrentUserId(): Long =
+//        context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+//            .getLong("current_user_id", -1L)
 }
