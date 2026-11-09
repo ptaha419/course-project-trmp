@@ -39,20 +39,13 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Карточки
-        HomeCard(
-            title = "Личный кабинет",
-            description = "Ваши данные, история заявок, настройки",
-            icon = Icons.Filled.Person,
-            onClick = onOpenAccount,
-            color = MaterialTheme.colorScheme.surfaceVariant
-        )
-        HomeCard(
-            title = "Карта города",
-            description = "Состояние экологии, точки мониторинга",
-            icon = Icons.Filled.Map,
-            onClick = onOpenMap,
-            color = MaterialTheme.colorScheme.tertiaryContainer
-        )
+//        HomeCard(
+//            title = "Личный кабинет",
+//            description = "Ваши данные, история заявок, настройки",
+//            icon = Icons.Filled.Person,
+//            onClick = onOpenAccount,
+//            color = MaterialTheme.colorScheme.surfaceVariant
+//        )
         HomeCard(
             title = "Новое обращение",
             description = "Сообщить об экологическом нарушении",
@@ -79,6 +72,14 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.secondaryContainer
             )
         }
+
+        HomeCard(
+            title = "Карта города",
+            description = "Состояние экологии, точки мониторинга",
+            icon = Icons.Filled.Map,
+            onClick = onOpenMap,
+            color = MaterialTheme.colorScheme.tertiaryContainer
+        )
     }
 }
 

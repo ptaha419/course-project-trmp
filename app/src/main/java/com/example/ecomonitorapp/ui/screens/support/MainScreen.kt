@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -80,8 +81,9 @@ fun MainScreen(repository: UserRepository) {
     val drawerItems = listOf(
         DrawerItem("Главная", Icons.Filled.Home, "home"),
         DrawerItem("Личный кабинет", Icons.Filled.Person, "account"),
-        DrawerItem("Карта города", Icons.Filled.Map, "map"),
-        DrawerItem("Новое обращение", Icons.Filled.Add, "report")
+        DrawerItem("Новое обращение", Icons.Filled.Add, "report"),
+        DrawerItem("Мои обращения", Icons.Filled.List, "myReports"),
+        DrawerItem("Карта города", Icons.Filled.Map, "map")
     )
 
     ModalNavigationDrawer(
