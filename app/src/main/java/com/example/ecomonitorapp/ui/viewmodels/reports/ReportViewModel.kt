@@ -80,7 +80,7 @@ class ReportViewModel(
             description = form.description,
             geoLoc = form.geoLoc,
             photo = form.photo,
-            status = form.status.name
+            reportPriority = form.violationType.toPriority()
         )
         if (editingDraftId.value == null && newId != null) {
             editingDraftId.value = newId
@@ -91,12 +91,12 @@ class ReportViewModel(
     fun loadDraft(id: Long) = viewModelScope.launch {
         val draft = repository.getDraftById(id) ?: return@launch
         editingDraftId.value = draft.id
-        onViolationTypeChange(draft.violationType)          // String — попадает в parseViolationType
+        onViolationTypeChange(draft.violationType)
         onDescriptionChange(draft.description)
         val lat = draft.latitude
         val lng = draft.longitude
         if (lat != null && lng != null) onGeoLocChange(GeoLoc(lat, lng))
-        onPhotoChange(draft.photo)                          // в entity поле называется photo, не photoPath
+        onPhotoChange(draft.photo)
     }
 
     fun submit(onSuccess: () -> Unit = {}) {

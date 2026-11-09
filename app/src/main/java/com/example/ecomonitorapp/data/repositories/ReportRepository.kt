@@ -35,7 +35,8 @@ class ReportRepository(private val context: Context,
             photo = photo,
             reportPriority = reportPriority.name,
             createdAt = Clock.System.now().toEpochMilliseconds(),
-            reportedBy = session.currentUserId
+            reportedBy = session.currentUserId,
+            status = ReportStatus.SENT.name,
         )
         return try {
             val newId = dao.insert(entity)
@@ -77,7 +78,7 @@ class ReportRepository(private val context: Context,
         description: String,
         geoLoc: GeoLoc?,
         photo: String?,
-        status: String
+        reportPriority: ReportPriority
     ): Long? = try {
         dao.upsert(
             ReportEntity(
@@ -87,9 +88,10 @@ class ReportRepository(private val context: Context,
                 latitude = geoLoc?.latitude,
                 longitude = geoLoc?.longitude,
                 photo = photo,
-                status = status,
+                reportPriority = reportPriority.name,
                 createdAt = Clock.System.now().toEpochMilliseconds(),
-                reportedBy = session.currentUserId
+                reportedBy = session.currentUserId,
+                status = ReportStatus.DRAFT.name
             )
         )
     } catch (e: Exception) {

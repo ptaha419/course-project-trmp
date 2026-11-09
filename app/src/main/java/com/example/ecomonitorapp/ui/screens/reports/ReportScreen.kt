@@ -1,5 +1,6 @@
 package com.example.ecomonitorapp.ui.screens.reports
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -135,21 +136,37 @@ private fun ReportForm(
         )
 
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions()
+        ) { grants ->
+            if (grants.values.all { it }) {
+                GeoLocationManager.getCurrentLocation(context) { geo ->
+                    vm.onGeoLocChange(geo)
+                }
+            } else {
+                Toast.makeText(context,
+                    "Разрешите доступ к местоположению в настройках",
+                    Toast.LENGTH_LONG).show()
+            }
+        }
+
         OutlinedButton(
             onClick = {
-                scope.launch {
-                    vm.onGeoLocChange(GeoLocationManager.getCurrentLocation(context))
+                if (GeoLocationManager.hasPermissions(context)) {
+                    GeoLocationManager.getCurrentLocation(context) { geo ->
+                        vm.onGeoLocChange(geo)
+                    }
+                } else {
+                    permissionLauncher.launch(GeoLocationManager.requiredPermissions)
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                if (form.geoLoc != null) {
+                if (form.geoLoc != null)
                     "Местоположение: ${form.geoLoc!!.latitude}, ${form.geoLoc!!.longitude}"
-                } else {
+                else
                     "Определить местоположение"
-                }
             )
         }
 
