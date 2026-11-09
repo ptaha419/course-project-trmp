@@ -53,7 +53,7 @@ fun EditAccountScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Редактировать профиль") },
+                title = { Text("Назад") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
