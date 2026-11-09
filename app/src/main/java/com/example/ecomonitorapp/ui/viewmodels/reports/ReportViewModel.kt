@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.ecomonitorapp.data.entities.ReportEntity
 import com.example.ecomonitorapp.data.managers.GeoLoc
 import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.data.mappers.toPriority
 import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
+import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.ViolationType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,15 +23,17 @@ import kotlinx.coroutines.launch
 sealed interface ReportState {
     data object Idle : ReportState
     data object Loading : ReportState
+    data object DraftSaved : ReportState
     data class Success(val report: Report) : ReportState
     data class Error(val message: String) : ReportState
 }
 
-data class ReportForm(
+data class ReportFormState(
     val violationType: ViolationType = ViolationType.NOT_SELECTED,
     val description: String = "",
     val geoLoc: GeoLoc? = null,
     val photo: String? = null,
+    val status: ReportStatus = ReportStatus.DRAFT
 ) {
     val isDescriptionValid: Boolean
         get() = description.trim().length >= 10
@@ -47,8 +51,10 @@ class ReportViewModel(
     private val _stateFlow = MutableStateFlow<ReportState>(ReportState.Idle)
     val stateFlow: StateFlow<ReportState> = _stateFlow.asStateFlow()
 
-    private val _formFlow = MutableStateFlow(ReportForm())
-    val formFlow: StateFlow<ReportForm> = _formFlow.asStateFlow()
+    private val _formFlow = MutableStateFlow(ReportFormState())
+    val formFlow: StateFlow<ReportFormState> = _formFlow.asStateFlow()
+
+    private val editingDraftId = MutableStateFlow<Long?>(null)
 
     fun onViolationTypeChange(raw: String?) {
         _formFlow.update { it.copy(violationType = parseViolationType(raw)) }
@@ -66,22 +72,56 @@ class ReportViewModel(
         _formFlow.update { it.copy(photo = uri) }
     }
 
+    fun saveDraft() = viewModelScope.launch {
+        val form = _formFlow.value
+        val newId = repository.upsertDraft(
+            id = editingDraftId.value,
+            violationType = form.violationType,
+            description = form.description,
+            geoLoc = form.geoLoc,
+            photo = form.photo,
+            status = form.status.name
+        )
+        if (editingDraftId.value == null && newId != null) {
+            editingDraftId.value = newId
+        }
+        _stateFlow.value = ReportState.DraftSaved
+    }
+
+    fun loadDraft(id: Long) = viewModelScope.launch {
+        val draft = repository.getDraftById(id) ?: return@launch
+        editingDraftId.value = draft.id
+        onViolationTypeChange(draft.violationType)          // String — попадает в parseViolationType
+        onDescriptionChange(draft.description)
+        val lat = draft.latitude
+        val lng = draft.longitude
+        if (lat != null && lng != null) onGeoLocChange(GeoLoc(lat, lng))
+        onPhotoChange(draft.photo)                          // в entity поле называется photo, не photoPath
+    }
+
     fun submit(onSuccess: () -> Unit = {}) {
         val form = _formFlow.value
         if (!form.canSubmit) return
 
         viewModelScope.launch {
             _stateFlow.value = ReportState.Loading
+            val geo = form.geoLoc
+            if (geo == null) {
+                _stateFlow.value = ReportState.Error("Укажите местоположение")
+                return@launch
+            }
 
             val created = repository.createReport(
                 violationType = form.violationType,
                 description = form.description.trim(),
-                geoLoc = form.geoLoc ?: return@launch,
+                geoLoc = geo,
                 photo = form.photo,
-                reportPriority = form.violationType.toPriority() // автоматический выбор приоритета
+                reportPriority = form.violationType.toPriority()
             )
 
             _stateFlow.value = if (created != null) {
+                editingDraftId.value?.let { repository.deleteReportById(it) }
+                editingDraftId.value = null
                 onSuccess()
                 ReportState.Success(created)
             } else {

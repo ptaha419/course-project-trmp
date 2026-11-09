@@ -38,11 +38,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ecomonitorapp.data.managers.SessionManager
+import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.data.repositories.UserRepository
 import com.example.ecomonitorapp.models.UserRole
 import com.example.ecomonitorapp.ui.screens.HomeScreen
 import com.example.ecomonitorapp.ui.screens.account.AccountScreen
 import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
+import com.example.ecomonitorapp.ui.screens.reports.MyReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
 import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
@@ -63,8 +66,6 @@ fun MainScreen(repository: UserRepository) {
     // следим за текущим маршрутом, чтобы менять заголовок
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route ?: "home"
-
-    var userId by remember { mutableStateOf(repository.getCurrentUserId()) }
 
     val title = when {
         currentRoute?.startsWith("account") == true -> "Личный кабинет"
@@ -101,7 +102,7 @@ fun MainScreen(repository: UserRepository) {
                         onClick = {
                             scope.launch { drawerState.close() }
                             navController.navigate(item.route) {
-                                popUpTo("home")            // «назад» всегда ведёт на главную
+                                popUpTo("home") // «назад» всегда ведёт на главную
                                 launchSingleTop = true
                             }
                         }
@@ -137,7 +138,9 @@ fun MainScreen(repository: UserRepository) {
                     }
                     HomeScreen(
                         userRole = userRole,
-                        onOpenAccount = { if (userId != -1L) navController.navigate("account/$userId") },
+                        onOpenAccount = {
+                            if (userId != -1L) navController.navigate("account?userId=$userId")
+                        },
                         onOpenMap = { navController.navigate("map") },
                         onCreateReport = { navController.navigate("report") },
                         onOpenListOfReports = { navController.navigate("listOfReports") },
@@ -180,13 +183,21 @@ fun MainScreen(repository: UserRepository) {
                         )
                     )
                 }
-                composable("report") {
-                    ReportScreen(
-                        vm = viewModel(
-                            factory = ReportViewModel.factory(LocalContext.current)
-                        ),
-                        onBack = { navController.popBackStack() }
+                composable(
+                    "report?draftId={draftId}",
+                    arguments = listOf(
+                        navArgument("draftId") {
+                            type = NavType.LongType
+                            defaultValue = -1L
+                        }
                     )
+                ) { entry ->
+                    val vm: ReportViewModel = viewModel(factory = ReportViewModel.factory(LocalContext.current))
+                    LaunchedEffect(entry) {
+                        val draftId = entry.arguments?.getLong("draftId") ?: -1L
+                        if (draftId != -1L) vm.loadDraft(draftId)
+                    }
+                    ReportScreen(vm = vm, onBack = { navController.popBackStack() })
                 }
                 composable("map") {
                     StubScreen("Карта города", onBack = { navController.popBackStack() })
@@ -195,7 +206,11 @@ fun MainScreen(repository: UserRepository) {
                     StubScreen("Обращения", onBack = { navController.popBackStack() })
                 }
                 composable("myReports") {
-                    StubScreen("Мои обращения", onBack = { navController.popBackStack() })
+                    MyReportsScreen(
+                        onOpenDraft = { draftId ->
+                            navController.navigate("report?draftId=$draftId")
+                        }
+                    )
                 }
             }
         }

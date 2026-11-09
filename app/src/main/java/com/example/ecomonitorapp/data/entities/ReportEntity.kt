@@ -23,11 +23,14 @@ data class ReportEntity(
     @PrimaryKey(autoGenerate = true) val id: Long? = null,
     @ColumnInfo(name = "violation_type") val violationType: String = ViolationType.NOT_SELECTED.name,
     @ColumnInfo(name = "description") val description: String,
-    @ColumnInfo(name = "latitude") val latitude: Double,
-    @ColumnInfo(name = "longitude") val longitude: Double,
+    @ColumnInfo(name = "latitude") val latitude: Double? = null,
+    @ColumnInfo(name = "longitude") val longitude: Double? = null,
     @ColumnInfo(name = "photo") val photo: String?,
     @ColumnInfo(name = "report_priority") val reportPriority: String = ReportPriority.NOT_SELECTED.name,
-    @ColumnInfo(name = "created_at") val createdAt: Long,
+    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "reported_by") val reportedBy: Long,
-    @ColumnInfo(name = "status") val status: String = ReportStatus.SENT.name,
-)
+    @ColumnInfo(name = "status") val status: String = ReportStatus.DRAFT.name,
+) {
+    val isDraft: Boolean
+        get() = status == ReportStatus.DRAFT.name
+}

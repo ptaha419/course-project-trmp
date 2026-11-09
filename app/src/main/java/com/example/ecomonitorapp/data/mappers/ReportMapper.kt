@@ -4,6 +4,7 @@ import com.example.ecomonitorapp.data.entities.ReportEntity
 import com.example.ecomonitorapp.data.managers.GeoLoc
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.Report
+import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.ViolationType
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -20,26 +21,41 @@ fun ViolationType.toPriority(): ReportPriority = when (this) {
     ViolationType.WATER_POLLUTION -> ReportPriority.MEDIUM
 }
 
-fun ReportEntity.toDomain(): Report = Report(
-    id = id ?: 0L,
-    violationType = violationType.let { runCatching { ViolationType.valueOf(it) }.getOrDefault(ViolationType.NOT_SELECTED) },
-    description = description,
-    geoLoc = GeoLoc(latitude, longitude),
-    photo = photo,
-    reportPriority = reportPriority.let { runCatching { ReportPriority.valueOf(it) }.getOrDefault(ReportPriority.NOT_SELECTED) },
-    createdAt = Instant.fromEpochMilliseconds(createdAt)
-        .toLocalDateTime(TimeZone.currentSystemDefault()),
-    reportedBy = reportedBy
-)
+private fun String.toViolationType(): ViolationType =
+    runCatching { ViolationType.valueOf(this) }.getOrDefault(ViolationType.NOT_SELECTED)
+
+private fun String.toReportPriority(): ReportPriority =
+    runCatching { ReportPriority.valueOf(this) }.getOrDefault(ReportPriority.NOT_SELECTED)
+
+private fun String.toReportStatus(): ReportStatus =
+    runCatching { ReportStatus.valueOf(this) }.getOrDefault(ReportStatus.DRAFT)
+
+fun ReportEntity.toDomainOrNull(): Report? {
+    val lat = latitude ?: return null
+    val lng = longitude ?: return null
+    return Report(
+        id = id ?: 0L,
+        violationType = violationType.toViolationType(),
+        description = description,
+        geoLoc = GeoLoc(lat, lng),
+        photo = photo,
+        reportPriority = reportPriority.toReportPriority(),
+        createdAt = Instant.fromEpochMilliseconds(createdAt)
+            .toLocalDateTime(TimeZone.currentSystemDefault()),
+        reportedBy = reportedBy,
+        status = status.toReportStatus()
+    )
+}
 
 fun Report.toEntity(): ReportEntity = ReportEntity(
     id = if (id == 0L) null else id,
     violationType = violationType.name,
     description = description,
-    latitude = geoLoc.latitude ?: 0.0,
-    longitude = geoLoc.longitude ?: 0.0,
+    latitude = geoLoc.latitude,
+    longitude = geoLoc.longitude,
     photo = photo,
     reportPriority = reportPriority.name,
     createdAt = createdAt.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
-    reportedBy = reportedBy
+    reportedBy = reportedBy,
+    status = status.name
 )

@@ -64,11 +64,6 @@ private fun AccountContent(user: User, onEditClick: () -> Unit) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-//        Text(
-//            text = "Личный кабинет",
-//            style = MaterialTheme.typography.headlineMedium,
-//            modifier = Modifier.padding(bottom = 16.dp)
-//        )
         InfoRow("Фамилия", user.lastName)
         InfoRow("Имя", user.firstName)
         user.middleName?.takeIf { it.isNotBlank() }?.let {
