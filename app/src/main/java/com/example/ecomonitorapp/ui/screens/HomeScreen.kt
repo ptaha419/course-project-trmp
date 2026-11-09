@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -25,6 +24,7 @@ import com.example.ecomonitorapp.models.UserRole
 
 @Composable
 fun HomeScreen(
+    modifier: Modifier = Modifier,
     userRole: UserRole?,
     onOpenAccount: () -> Unit,
     onOpenMap: () -> Unit,
@@ -38,12 +38,6 @@ fun HomeScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Главное меню",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
         // Карточки
         HomeCard(
             title = "Личный кабинет",

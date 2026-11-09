@@ -29,10 +29,11 @@ import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
 import com.example.ecomonitorapp.ui.screens.auth.LoginScreen
 import com.example.ecomonitorapp.ui.screens.auth.RegisterScreen
 import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
+import com.example.ecomonitorapp.ui.screens.support.MainScreen
 import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
-import com.example.ecomonitorapp.ui.screens.StubScreen
+import com.example.ecomonitorapp.ui.screens.support.StubScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,15 +47,16 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "register", // первый экран при запуске
+                        startDestination = "login", // первый экран при запуске
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("register") {
                             RegisterScreen(
                                 onSuccess = { user ->
                                     repository.saveCurrentUserId(user.id)
-                                    // переход на главный экран после успешной регистрации
-                                    navController.navigate("home")
+                                    navController.navigate("main") {
+                                        popUpTo("login") { inclusive = true } // чтобы «назад» не возвращал на логин
+                                    }
                                 },
                                 onToLogin = { navController.navigate("login") }
                             )
@@ -63,81 +65,15 @@ class MainActivity : ComponentActivity() {
                             LoginScreen(
                                 onSuccess = { user ->
                                     repository.saveCurrentUserId(user.id)
-                                    // переход на главный экран после авторизации
-                                    navController.navigate("home")
+                                    navController.navigate("main") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 },
                                 onToRegister = { navController.navigate("register") }
                             )
                         }
-                        composable("home") {
-                            val userId = repository.getCurrentUserId()
-                            var userRole by remember { mutableStateOf<UserRole?>(null) }
-                            // getUserRole — suspend, пока роль не загрузится, экран покажет только
-                            // общие карточки, а потом - ролевые
-                            LaunchedEffect(userId) {
-                                userRole = repository.getUserRole(userId)
-                            }
-                            HomeScreen(
-                                userRole = userRole,
-                                onOpenAccount = { if (userId != -1L) navController.navigate("account/$userId") },
-                                onOpenMap = { navController.navigate("map") },
-                                onCreateReport = { navController.navigate("report") },
-                                onOpenListOfReports = { navController.navigate("listOfReports") },
-                                onOpenMyReports = { navController.navigate("myReports") }
-                            )
-                        }
-                        composable(
-                            "account/{userId}",
-                            arguments = listOf(navArgument("userId") { type = NavType.LongType })
-                        ) { backStackEntry ->
-                            val userId = backStackEntry.arguments?.getLong("userId") ?: return@composable
-                            val viewModel: AccountViewModel = viewModel(
-                                factory = AccountViewModel.factory(LocalContext.current.applicationContext)
-                            )
-                            AccountScreen(
-                                vm = viewModel,
-                                userId = userId,
-                                onEditClick = { navController.navigate("editAccount/$userId") }
-                            )
-                        }
-                        composable(
-                            "editAccount/{userId}",
-                            arguments = listOf(navArgument("userId") { type = NavType.LongType })
-                        ) { backStackEntry ->
-                            val userId = backStackEntry.arguments?.getLong("userId") ?: return@composable
-                            EditAccountScreen(
-                                userId = userId,
-                                onBack = { navController.popBackStack() },
-                                vm = viewModel(
-                                    factory = EditAccountViewModel.factory(LocalContext.current)
-                                )
-                            )
-                        }
-                        composable("report") {
-                            ReportScreen(
-                                vm = viewModel(
-                                    factory = ReportViewModel.factory(LocalContext.current)
-                                ),
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("map") {
-                            StubScreen(
-                                "Карта",
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("listOfReports") {
-                            StubScreen(
-                                "Обращения",
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("myReports") {
-                            StubScreen(
-                                "Мои обращения",
-                                onBack = { navController.popBackStack() }
-                            )
+                        composable("main") {
+                            MainScreen(repository = repository)
                         }
                     }
                 }
