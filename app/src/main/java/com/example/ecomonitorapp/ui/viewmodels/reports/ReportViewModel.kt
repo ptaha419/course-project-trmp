@@ -54,9 +54,13 @@ class ReportViewModel(
     private val _formFlow = MutableStateFlow(ReportFormState())
     val formFlow: StateFlow<ReportFormState> = _formFlow.asStateFlow()
 
+    // флаг для просмотра обращения
+    private val _viewOnly = MutableStateFlow(false)
+    val viewOnly: StateFlow<Boolean> = _viewOnly.asStateFlow()
+
     private val editingDraftId = MutableStateFlow<Long?>(null)
 
-
+    // флаг для сохранения обращения в черновик
     private val _draftSaved = MutableStateFlow(false)
     val draftSaved = _draftSaved.asStateFlow()
 
@@ -75,6 +79,29 @@ class ReportViewModel(
     fun onPhotoChange(uri: String?) {
         _formFlow.update { it.copy(photo = uri) }
     }
+
+    fun loadReport(id: Long) = viewModelScope.launch {
+        val report = repository.getReportById(id) ?: return@launch
+        _viewOnly.value = true  // только просмотр
+        editingDraftId.value = null  // не привязываем к черновику
+        onViolationTypeChange(report.violationType)
+        onDescriptionChange(report.description)
+        val lat = report.latitude
+        val lng = report.longitude
+        if (lat != null && lng != null) onGeoLocChange(GeoLoc(lat, lng))
+        onPhotoChange(report.photo)
+    }
+
+    fun reset() {
+        _viewOnly.value = false
+        editingDraftId.value = null
+        _formFlow.value = ReportFormState()
+        _stateFlow.value = ReportState.Idle
+    }
+
+//    fun resetViewOnly() {
+//        _viewOnly.value = false
+//    }
 
     fun saveDraft() = viewModelScope.launch {
         val form = _formFlow.value
@@ -133,17 +160,6 @@ class ReportViewModel(
                 ReportState.Error("Не удалось создать обращение!")
             }
         }
-    }
-
-    fun loadReport(id: Long) = viewModelScope.launch {
-        val report = repository.getReportById(id) ?: return@launch
-        editingDraftId.value = report.id
-        onViolationTypeChange(report.violationType)
-        onDescriptionChange(report.description)
-        val lat = report.latitude
-        val lng = report.longitude
-        if (lat != null && lng != null) onGeoLocChange(GeoLoc(lat, lng))
-        onPhotoChange(report.photo)
     }
 
     fun resetDraftSaved() {

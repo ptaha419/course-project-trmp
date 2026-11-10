@@ -53,11 +53,11 @@ fun MyReportsScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .then(
-                        if (report.isDraft) Modifier.clickable {
-                            report.id?.let(onOpenDraft)
-                        } else Modifier
-                    )
+                    .clickable {
+                        report.id?.let { id ->
+                            if (report.isDraft) onOpenDraft(id) else onOpenReport(id)
+                        }
+                    }
             ) {
                 Column(Modifier.padding(16.dp)) {
                     Row(
