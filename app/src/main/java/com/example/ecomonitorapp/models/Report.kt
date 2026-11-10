@@ -31,5 +31,6 @@ data class Report (
     val reportPriority: ReportPriority = ReportPriority.NOT_SELECTED,
     val createdAt: LocalDateTime,
     val reportedBy: Long,
-    val status: ReportStatus = ReportStatus.SENT
+    val status: ReportStatus = ReportStatus.SENT,
+    val violationCard: Long
 )
