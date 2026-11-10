@@ -19,7 +19,9 @@ enum class ReportPriority(val displayName: String) {
 
 enum class ReportStatus(val displayName: String) {
     DRAFT("Черновик"),
-    SENT("Отправлено")
+    SENT("Отправлено"),
+    REJECTED("Отклонено"),
+    ACCEPTED("Принято к рассмотрению")
 }
 
 data class Report (

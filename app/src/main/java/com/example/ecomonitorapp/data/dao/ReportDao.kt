@@ -23,6 +23,9 @@ interface ReportDao {
     @Query("SELECT * FROM report WHERE reported_by = :userId ORDER BY created_at DESC")
     suspend fun getByUserId(userId: Long): List<ReportEntity>
 
+    @Query("UPDATE report SET status = :status WHERE id = :reportId")
+    suspend fun updateStatus(reportId: Long, status: String)
+
     @Update
     suspend fun update(report: ReportEntity)
 

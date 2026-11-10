@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.ecomonitorapp.models.ReportStatus
+import com.example.ecomonitorapp.models.ViolationStatus
 
 @Entity(tableName = "violation_card",
     foreignKeys = [
@@ -30,6 +30,6 @@ data class ViolationCardEntity (
     @PrimaryKey(autoGenerate = true) val id: Long? = null,
     @ColumnInfo(name = "report") val report: Long,
     @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis(),
-    @ColumnInfo(name = "status") val status: String = ReportStatus.DRAFT.name,
+    @ColumnInfo(name = "status") val status: String = ViolationStatus.UNDER_CONSIDERATION.name,
     @ColumnInfo(name = "verified_by") val verifiedBy: Long,
 )

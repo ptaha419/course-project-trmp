@@ -18,6 +18,9 @@ interface ViolationCardDao {
     @Query("SELECT * FROM violation_card WHERE id = :id")
     suspend fun getById(id: Long): ViolationCardEntity?
 
+    @Query("SELECT * FROM violation_card WHERE report = :reportId LIMIT 1")
+    suspend fun getByReportId(reportId: Long): ViolationCardEntity?
+
     @Update
     suspend fun update(violationCard: ViolationCardEntity)
 

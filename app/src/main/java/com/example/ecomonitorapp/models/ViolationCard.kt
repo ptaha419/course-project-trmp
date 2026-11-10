@@ -12,7 +12,7 @@ enum class ViolationStatus(val displayName: String) {
 data class ViolationCard (
     val id: Long,
     val report: Long,
-    val status: String,
+    val status: ViolationStatus = ViolationStatus.UNDER_CONSIDERATION,
     val createdAt: LocalDateTime,
     val verifiedBy: Long
 )

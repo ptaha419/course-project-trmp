@@ -13,7 +13,7 @@ data class Notification (
     val id: Long,
     val report: Long,
     val message: String,
-    val status: String,
+    val status: NotificationStatus = NotificationStatus.NOT_SENT,
     val createdAt: LocalDateTime,
     val sendBy: Long,
     val sendTo: Long

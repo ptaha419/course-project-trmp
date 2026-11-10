@@ -4,8 +4,10 @@ import android.content.Context
 import android.util.Log
 import com.example.ecomonitorapp.data.dao.ReportDao
 import com.example.ecomonitorapp.data.dao.UserDao
+import com.example.ecomonitorapp.data.dao.ViolationCardDao
 import com.example.ecomonitorapp.data.db.DbProvider
 import com.example.ecomonitorapp.data.entities.ReportEntity
+import com.example.ecomonitorapp.data.entities.ViolationCardEntity
 import com.example.ecomonitorapp.data.managers.GeoLoc
 import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.data.mappers.toDomainOrNull
@@ -13,6 +15,7 @@ import com.example.ecomonitorapp.data.mappers.toEntity
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ReportStatus
+import com.example.ecomonitorapp.models.ViolationStatus
 import com.example.ecomonitorapp.models.ViolationType
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Clock
@@ -22,6 +25,7 @@ class ReportRepository(private val context: Context,
 ) {
     private val dao: ReportDao = DbProvider.getDatabase(context).reportDao()
     private val userDao: UserDao = DbProvider.getDatabase(context).userDao()
+    private val violationCardDao: ViolationCardDao = DbProvider.getDatabase(context).violationCardDao()
 
     suspend fun createReport(
         violationType: ViolationType,
@@ -123,5 +127,27 @@ class ReportRepository(private val context: Context,
     } catch (e: Exception) {
         e.printStackTrace()
         false
+    }
+
+    suspend fun rejectReport(reportId: Long): Boolean = try {
+        dao.updateStatus(reportId, ReportStatus.REJECTED.name)
+        true
+    } catch (e: Exception) {
+        false
+    }
+
+    suspend fun createViolationCard(reportId: Long, moderatorId: Long): Long? = try {
+        // защита от повторного создания карточки по одному обращению
+        if (violationCardDao.getByReportId(reportId) != null) return null
+
+        val card = ViolationCardEntity(
+            report = reportId,
+            status = ViolationStatus.UNDER_CONSIDERATION.name,
+            verifiedBy = moderatorId
+        )
+        dao.updateStatus(reportId, ReportStatus.ACCEPTED.name)
+        violationCardDao.insert(card)
+    } catch (e: Exception) {
+        null
     }
 }
