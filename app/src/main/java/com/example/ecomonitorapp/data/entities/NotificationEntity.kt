@@ -7,7 +7,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.ecomonitorapp.models.NotificationStatus
 
-@Entity(tableName = "violation_card",
+@Entity(tableName = "notification",
     foreignKeys = [
         ForeignKey(
             entity = ReportEntity::class,
