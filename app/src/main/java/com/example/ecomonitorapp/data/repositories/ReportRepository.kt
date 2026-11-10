@@ -10,6 +10,7 @@ import com.example.ecomonitorapp.data.entities.ReportEntity
 import com.example.ecomonitorapp.data.entities.ViolationCardEntity
 import com.example.ecomonitorapp.data.managers.GeoLoc
 import com.example.ecomonitorapp.data.managers.SessionManager
+import com.example.ecomonitorapp.data.mappers.toDomain
 import com.example.ecomonitorapp.data.mappers.toDomainOrNull
 import com.example.ecomonitorapp.data.mappers.toEntity
 import com.example.ecomonitorapp.models.Report
@@ -57,6 +58,8 @@ class ReportRepository(private val context: Context,
             null
         }
     }
+
+    fun getCurrentUserId(): Long? = session.getCurrentUserIdOrNull()
 
     suspend fun getReportsByUser(): List<Report?> =
         dao.getByUserId(session.currentUserId).map { it.toDomainOrNull() }
@@ -113,7 +116,11 @@ class ReportRepository(private val context: Context,
     // загрузить черновик по id (для loadDraft)
     suspend fun getDraftById(id: Long): ReportEntity? = dao.getById(id)
 
-    suspend fun getReportById(id: Long): ReportEntity? = dao.getById(id)
+    suspend fun getReportById(id: Long): Report? {
+        val entity = dao.getById(id) ?: return null
+        val violationCard = violationCardDao.getByReportId(id)?.toDomain()
+        return entity.toDomainOrNull(violationCard)
+    }
 
     fun observeAll(): Flow<List<ReportEntity>> = dao.observeAll()
 
@@ -136,14 +143,14 @@ class ReportRepository(private val context: Context,
         false
     }
 
-    suspend fun createViolationCard(reportId: Long, moderatorId: Long): Long? = try {
+    suspend fun createViolationCard(reportId: Long, userId: Long): Long? = try {
         // защита от повторного создания карточки по одному обращению
         if (violationCardDao.getByReportId(reportId) != null) return null
 
         val card = ViolationCardEntity(
             report = reportId,
             status = ViolationStatus.UNDER_CONSIDERATION.name,
-            verifiedBy = moderatorId
+            verifiedBy = userId
         )
         dao.updateStatus(reportId, ReportStatus.ACCEPTED.name)
         violationCardDao.insert(card)

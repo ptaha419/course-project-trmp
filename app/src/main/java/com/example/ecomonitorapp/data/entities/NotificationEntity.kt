@@ -18,14 +18,20 @@ import com.example.ecomonitorapp.models.NotificationStatus
         ForeignKey(
             entity = UserEntity::class,
             parentColumns = ["id"],
-            childColumns = ["sent_to", "sent_by"],
+            childColumns = ["send_by"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["send_to"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
         Index("report"),
-        Index("sent_to"),
-        Index("sent_by")
+        Index("send_to"),
+        Index("send_by")
     ])
 data class NotificationEntity (
     @PrimaryKey(autoGenerate = true) val id: Long? = null,

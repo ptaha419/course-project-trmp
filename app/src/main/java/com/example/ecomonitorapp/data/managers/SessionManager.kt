@@ -8,4 +8,7 @@ class SessionManager(context: Context) {
     var currentUserId: Long
         get() = prefs.getLong("current_user_id", -1L)
         set(value) = prefs.edit().putLong("current_user_id", value).apply()
+
+    fun getCurrentUserIdOrNull(): Long? =
+        currentUserId.takeIf { it != -1L }
 }

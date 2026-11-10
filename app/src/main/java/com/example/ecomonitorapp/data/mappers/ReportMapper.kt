@@ -5,6 +5,7 @@ import com.example.ecomonitorapp.data.managers.GeoLoc
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportStatus
+import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationType
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -30,7 +31,7 @@ private fun String.toReportPriority(): ReportPriority =
 private fun String.toReportStatus(): ReportStatus =
     runCatching { ReportStatus.valueOf(this) }.getOrDefault(ReportStatus.DRAFT)
 
-fun ReportEntity.toDomainOrNull(): Report? {
+fun ReportEntity.toDomainOrNull(violationCard: ViolationCard? = null): Report? {
     val lat = latitude ?: return null
     val lng = longitude ?: return null
     return Report(
@@ -43,7 +44,8 @@ fun ReportEntity.toDomainOrNull(): Report? {
         createdAt = Instant.fromEpochMilliseconds(createdAt)
             .toLocalDateTime(TimeZone.currentSystemDefault()),
         reportedBy = reportedBy,
-        status = status.toReportStatus()
+        status = status.toReportStatus(),
+        violationCard = violationCard
     )
 }
 

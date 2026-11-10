@@ -34,5 +34,5 @@ data class Report (
     val createdAt: LocalDateTime,
     val reportedBy: Long,
     val status: ReportStatus = ReportStatus.SENT,
-    val violationCard: Long
+    val violationCard: ViolationCard? = null
 )
