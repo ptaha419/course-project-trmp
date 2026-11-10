@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -55,9 +56,9 @@ fun HomeScreen(
         )
         if (userRole == UserRole.MODERATOR) {
             HomeCard(
-                title = "Список обращений",
+                title = "Список всех обращений",
                 description = "Просмотреть все поступившие обращения",
-                icon = Icons.AutoMirrored.Filled.List,
+                icon = Icons.Filled.Layers,
                 onClick = onOpenListOfReports,
                 color = MaterialTheme.colorScheme.secondaryContainer
             )

@@ -135,6 +135,17 @@ class ReportViewModel(
         }
     }
 
+    fun loadReport(id: Long) = viewModelScope.launch {
+        val report = repository.getReportById(id) ?: return@launch
+        editingDraftId.value = report.id
+        onViolationTypeChange(report.violationType)
+        onDescriptionChange(report.description)
+        val lat = report.latitude
+        val lng = report.longitude
+        if (lat != null && lng != null) onGeoLocChange(GeoLoc(lat, lng))
+        onPhotoChange(report.photo)
+    }
+
     fun resetDraftSaved() {
         _draftSaved.value = false
     }

@@ -109,6 +109,8 @@ class ReportRepository(private val context: Context,
     // загрузить черновик по id (для loadDraft)
     suspend fun getDraftById(id: Long): ReportEntity? = dao.getById(id)
 
+    suspend fun getReportById(id: Long): ReportEntity? = dao.getById(id)
+
     fun observeAll(): Flow<List<ReportEntity>> = dao.observeAll()
 
     fun observeMyReports(): Flow<List<ReportEntity>> =

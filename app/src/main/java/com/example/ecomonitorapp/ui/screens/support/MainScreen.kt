@@ -2,9 +2,10 @@ package com.example.ecomonitorapp.ui.screens.support
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -39,13 +40,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.ecomonitorapp.data.managers.SessionManager
-import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.data.repositories.UserRepository
 import com.example.ecomonitorapp.models.UserRole
 import com.example.ecomonitorapp.ui.screens.HomeScreen
 import com.example.ecomonitorapp.ui.screens.account.AccountScreen
 import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
+import com.example.ecomonitorapp.ui.screens.reports.AllReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.MyReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
 import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
@@ -54,12 +54,17 @@ import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
 import kotlinx.coroutines.launch
 
 // Модель раздела меню
-
 data class DrawerItem(val title: String, val icon: ImageVector, val route: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(repository: UserRepository) {
+    val userId = repository.getCurrentUserId()
+    var userRole by remember { mutableStateOf<UserRole?>(null) }
+    LaunchedEffect(userId) {
+        userRole = repository.getUserRole(userId)
+    }
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -73,18 +78,28 @@ fun MainScreen(repository: UserRepository) {
         currentRoute?.startsWith("editAccount") == true -> "Редактирование"
         currentRoute == "map" -> "Карта города"
         currentRoute == "report" -> "Новое обращение"
-        currentRoute == "listOfReports" -> "Обращения"
+        currentRoute == "allReports" -> "Список обращений"
         currentRoute == "myReports" -> "Мои обращения"
         else -> "EcoMonitorApp"
     }
 
-    val drawerItems = listOf(
+    val drawerItems = mutableListOf(
         DrawerItem("Главная", Icons.Filled.Home, "home"),
         DrawerItem("Личный кабинет", Icons.Filled.Person, "account"),
         DrawerItem("Новое обращение", Icons.Filled.Add, "report"),
-        DrawerItem("Мои обращения", Icons.Filled.List, "myReports"),
+        DrawerItem("Мои обращения", Icons.AutoMirrored.Filled.List, "myReports"),
         DrawerItem("Карта города", Icons.Filled.Map, "map")
     )
+
+    if (userRole == UserRole.MODERATOR) {
+        drawerItems.add(
+            DrawerItem(
+                title = "Список всех обращений",
+                icon = Icons.Filled.Layers,
+                route = "allReports"
+            )
+        )
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -145,7 +160,7 @@ fun MainScreen(repository: UserRepository) {
                         },
                         onOpenMap = { navController.navigate("map") },
                         onCreateReport = { navController.navigate("report") },
-                        onOpenListOfReports = { navController.navigate("listOfReports") },
+                        onOpenListOfReports = { navController.navigate("allReports") },
                         onOpenMyReports = { navController.navigate("myReports") }
                     )
                 }
@@ -185,6 +200,42 @@ fun MainScreen(repository: UserRepository) {
                         )
                     )
                 }
+                composable("map") {
+                    StubScreen("Карта города", onBack = { navController.popBackStack() })
+                }
+                composable("allReports") {
+                    AllReportsScreen(
+                        onOpenReport = { reportId ->
+                            navController.navigate("report?reportId=$reportId")
+                        }
+                    )
+                }
+                composable("myReports") {
+                    MyReportsScreen(
+                        onOpenReport = { reportId ->
+                            navController.navigate("report?reportId=$reportId")
+                        },
+                        onOpenDraft = { draftId ->
+                            navController.navigate("report?draftId=$draftId")
+                        }
+                    )
+                }
+                composable(
+                    "report?reportId={reportId}",
+                    arguments = listOf(
+                        navArgument("reportId") {
+                            type = NavType.LongType
+                            defaultValue = -1L
+                        }
+                    )
+                ) { entry ->
+                    val vm: ReportViewModel = viewModel(factory = ReportViewModel.factory(LocalContext.current))
+                    LaunchedEffect(entry) {
+                        val reportId = entry.arguments?.getLong("reportId") ?: -1L
+                        if (reportId != -1L) vm.loadReport(reportId)
+                    }
+                    ReportScreen(vm = vm, onBack = { navController.popBackStack() })
+                }
                 composable(
                     "report?draftId={draftId}",
                     arguments = listOf(
@@ -200,19 +251,6 @@ fun MainScreen(repository: UserRepository) {
                         if (draftId != -1L) vm.loadDraft(draftId)
                     }
                     ReportScreen(vm = vm, onBack = { navController.popBackStack() })
-                }
-                composable("map") {
-                    StubScreen("Карта города", onBack = { navController.popBackStack() })
-                }
-                composable("listOfReports") {
-                    StubScreen("Обращения", onBack = { navController.popBackStack() })
-                }
-                composable("myReports") {
-                    MyReportsScreen(
-                        onOpenDraft = { draftId ->
-                            navController.navigate("report?draftId=$draftId")
-                        }
-                    )
                 }
             }
         }

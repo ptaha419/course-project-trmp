@@ -30,6 +30,7 @@ import com.example.ecomonitorapp.models.ViolationType
 
 @Composable
 fun MyReportsScreen(
+    onOpenReport: (Long) -> Unit,
     onOpenDraft: (Long) -> Unit,
 ) {
     val context = LocalContext.current
