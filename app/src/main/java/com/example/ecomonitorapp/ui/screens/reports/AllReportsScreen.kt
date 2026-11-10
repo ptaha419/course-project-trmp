@@ -1,5 +1,7 @@
 package com.example.ecomonitorapp.ui.screens.reports
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,12 +12,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,10 +48,16 @@ fun AllReportsScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items( reports.filter {
-            it.id != null && !it.isDraft },
-            key = { it.id!! } ) { report ->
-            Card( modifier = Modifier.fillMaxWidth() ) {
+        items(reports.filter { it.id != null }, key = { it.id!! }) { report ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        report.id?.let { id ->
+                            onOpenReport(id)
+                        }
+                    }
+            ) {
                 Column(Modifier.padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -58,6 +68,20 @@ fun AllReportsScreen(
                             text = ViolationType.valueOf(report.violationType).displayName,
                             style = MaterialTheme.typography.titleSmall
                         )
+                        if (report.isDraft) {
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
+                                color = Color.Transparent,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            ) {
+                                Text(
+                                    text = "Черновик",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
                     Text(
                         text = report.description.ifEmpty { "Описание не заполнено" },
