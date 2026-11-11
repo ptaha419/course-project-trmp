@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.models.ReportPriority
+import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.ViolationType
 import com.example.ecomonitorapp.ui.screens.support.ReportFilterPanel
 
@@ -54,14 +55,18 @@ fun AllReportsScreen(
     // null = показывать все
     var selectedPriority by remember { mutableStateOf<ReportPriority?>(null) }
     var selectedViolationType by remember { mutableStateOf<ViolationType?>(null) }
+    var selectedReportStatus by remember { mutableStateOf<ReportStatus?>(null) }
 
-    val filteredReports = remember(reports, selectedPriority, selectedViolationType) {
+    val filteredReports = remember(reports, selectedPriority,
+        selectedViolationType, selectedReportStatus) {
         val priority = selectedPriority
         val type = selectedViolationType
+        val status = selectedReportStatus
         reports.filter { report ->
             report.id != null &&
                     (priority == null || report.reportPriority == priority.name) &&
-                    (type == null || report.violationType == type.name)
+                    (type == null || report.violationType == type.name) &&
+                    (status == null || report.status == status.name)
         }
     }
 
@@ -74,7 +79,9 @@ fun AllReportsScreen(
                 selectedPriority = selectedPriority,
                 onPrioritySelected = { selectedPriority = it },
                 selectedViolationType = selectedViolationType,
-                onViolationTypeSelected = { selectedViolationType = it }
+                onViolationTypeSelected = { selectedViolationType = it },
+                selectedReportStatus = selectedReportStatus,
+                onReportStatusSelected = { selectedReportStatus = it }
             )
         }
 

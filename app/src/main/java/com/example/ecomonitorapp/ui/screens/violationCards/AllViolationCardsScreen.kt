@@ -14,7 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,8 +29,11 @@ import com.example.ecomonitorapp.data.entities.ViolationCardEntity
 import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.data.repositories.ViolationCardRepository
+import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ViolationStatus
 import com.example.ecomonitorapp.models.ViolationType
+import com.example.ecomonitorapp.ui.screens.support.ReportFilterPanel
+import com.example.ecomonitorapp.ui.screens.support.ViolationFilterPanel
 import kotlin.collections.emptyList
 
 data class CardWithReportRow(
@@ -49,14 +54,39 @@ fun AllViolationCardsScreen(
     val cards by repository.observeAllCards()
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
+    var selectedPriority by remember { mutableStateOf<ReportPriority?>(null) }
+    var selectedViolationType by remember { mutableStateOf<ViolationType?>(null) }
+    var selectedViolationStatus by remember { mutableStateOf<ViolationStatus?>(null) }
+
+    val filteredCards = remember(cards, selectedPriority,
+        selectedViolationType, selectedViolationStatus) {
+        val priority = selectedPriority
+        val type = selectedViolationType
+        val status = selectedViolationStatus
+        cards.filter { row ->
+            row.card.id != null &&
+                    (priority == null || row.report.reportPriority == priority.name) &&
+                    (type == null || row.report.violationType == type.name) &&
+                    (selectedViolationStatus == null || row.card.status == status?.name)
+        }
+    }
+
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(
-            cards.filter { it.card.id != null },
-            key = { it.card.id!! }
-        ) { row ->
+        item {
+            ViolationFilterPanel(
+                selectedPriority = selectedPriority,
+                onPrioritySelected = { selectedPriority = it },
+                selectedViolationType = selectedViolationType,
+                onViolationTypeSelected = { selectedViolationType = it },
+                selectedViolationStatus = selectedViolationStatus,
+                onViolationStatusSelected = { selectedViolationStatus = it }
+            )
+        }
+
+        items(filteredCards, key = { it.card.id!! }) { row ->
             val card = row.card
             val report = row.report
 
