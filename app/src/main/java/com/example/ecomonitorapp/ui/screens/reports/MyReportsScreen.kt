@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.data.repositories.ReportRepository
+import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ViolationType
 
 @Composable
@@ -66,7 +67,7 @@ fun MyReportsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = ViolationType.valueOf(report.violationType).displayName,
+                            text = "Обращение №${report.id}",
                             style = MaterialTheme.typography.titleSmall
                         )
                         if (report.isDraft) {
@@ -84,6 +85,16 @@ fun MyReportsScreen(
                             }
                         }
                     }
+                    Text(
+                        text = ReportPriority.valueOf(report.reportPriority).displayName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = ViolationType.valueOf(report.violationType).displayName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text(
                         text = report.description.ifEmpty { "Описание не заполнено" },
                         style = MaterialTheme.typography.bodySmall,
