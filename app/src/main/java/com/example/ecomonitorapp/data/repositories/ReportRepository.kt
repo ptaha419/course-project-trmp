@@ -21,6 +21,7 @@ import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationStatus
 import com.example.ecomonitorapp.models.ViolationType
+import com.example.ecomonitorapp.ui.screens.violationCards.CardWithReportRow
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Clock
 
@@ -132,6 +133,9 @@ class ReportRepository(private val context: Context,
 
     fun observeMyReports(): Flow<List<ReportEntity>> =
         dao.observeByUser(session.currentUserId)
+
+    fun observeAllCards(): Flow<List<CardWithReportRow>> =
+        violationCardDao.observeAllWithReports()
 
     // удалить черновик после успешной отправки
     suspend fun deleteReportById(id: Long): Boolean = try {

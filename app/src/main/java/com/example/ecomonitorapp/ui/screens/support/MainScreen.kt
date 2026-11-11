@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Map
@@ -48,6 +49,7 @@ import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
 import com.example.ecomonitorapp.ui.screens.reports.AllReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.MyReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
+import com.example.ecomonitorapp.ui.screens.violationCards.AllViolationCardsScreen
 import com.example.ecomonitorapp.ui.screens.violationCards.ViolationCardScreen
 import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
@@ -82,7 +84,8 @@ fun MainScreen(repository: UserRepository) {
         currentRoute == "report" -> "Новое обращение"
         currentRoute == "allReports" -> "Список обращений"
         currentRoute == "myReports" -> "Мои обращения"
-        currentRoute?.startsWith("violation_card") == true -> "Карточка нарушения"
+        currentRoute == "allViolationCards" -> "Карточки нарушений"
+        currentRoute?.startsWith("violationCard") == true -> "Карточка нарушения"
         else -> "EcoMonitorApp"
     }
 
@@ -91,7 +94,8 @@ fun MainScreen(repository: UserRepository) {
         DrawerItem("Личный кабинет", Icons.Filled.Person, "account"),
         DrawerItem("Новое обращение", Icons.Filled.Add, "report"),
         DrawerItem("Мои обращения", Icons.AutoMirrored.Filled.List, "myReports"),
-        DrawerItem("Карта города", Icons.Filled.Map, "map")
+        DrawerItem("Карта города", Icons.Filled.Map, "map"),
+        DrawerItem("Карточки нарушений", Icons.Filled.Folder, "allViolationCards")
     )
 
     if (userRole == UserRole.MODERATOR) {
@@ -164,7 +168,8 @@ fun MainScreen(repository: UserRepository) {
                         onOpenMap = { navController.navigate("map") },
                         onCreateReport = { navController.navigate("report") },
                         onOpenListOfReports = { navController.navigate("allReports") },
-                        onOpenMyReports = { navController.navigate("myReports") }
+                        onOpenMyReports = { navController.navigate("myReports") },
+                        onOpenListOfViolationCards = { navController.navigate("allViolationCards") },
                     )
                 }
                 composable(
@@ -240,7 +245,7 @@ fun MainScreen(repository: UserRepository) {
                     ReportScreen(
                         vm = vm,
                         onBack = { navController.popBackStack() },
-                        onOpenCard = { cardId -> navController.navigate("violation_card/$cardId") },  // ← добавили
+                        onOpenCard = { cardId -> navController.navigate("violationCard/$cardId") },
                     )
                 }
 
@@ -261,11 +266,16 @@ fun MainScreen(repository: UserRepository) {
                     ReportScreen(
                         vm = vm,
                         onBack = { navController.popBackStack() },
-                        onOpenCard = { cardId -> navController.navigate("violation_card/$cardId") },  // ← добавили
+                        onOpenCard = { cardId -> navController.navigate("violationCard/$cardId") },
+                    )
+                }
+                composable("allViolationCards") {
+                    AllViolationCardsScreen(
+                        onOpenCard = { cardId -> navController.navigate("violationCard/$cardId") }
                     )
                 }
                 composable(
-                    "violation_card/{cardId}",
+                    "violationCard/{cardId}",
                     arguments = listOf(navArgument("cardId") { type = NavType.LongType })
                 ) { entry ->
                     val vm: ViolationCardViewModel = viewModel(factory = ViolationCardViewModel.factory(LocalContext.current))

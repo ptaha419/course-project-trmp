@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
@@ -32,6 +33,7 @@ fun HomeScreen(
     onCreateReport: () -> Unit,
     onOpenListOfReports: () -> Unit,
     onOpenMyReports: () -> Unit,
+    onOpenListOfViolationCards: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -54,15 +56,6 @@ fun HomeScreen(
             onClick = onCreateReport,
             color = MaterialTheme.colorScheme.primaryContainer
         )
-        if (userRole == UserRole.MODERATOR) {
-            HomeCard(
-                title = "Список всех обращений",
-                description = "Просмотреть все поступившие обращения",
-                icon = Icons.Filled.Layers,
-                onClick = onOpenListOfReports,
-                color = MaterialTheme.colorScheme.secondaryContainer
-            )
-        }
 
         if (userRole == UserRole.APPLICANT || userRole == UserRole.MODERATOR) {
             HomeCard(
@@ -71,6 +64,23 @@ fun HomeScreen(
                 icon = Icons.AutoMirrored.Filled.List,
                 onClick = onOpenMyReports,
                 color = MaterialTheme.colorScheme.secondaryContainer
+            )
+        }
+
+        if (userRole == UserRole.MODERATOR) {
+            HomeCard(
+                title = "Список всех обращений",
+                description = "Просмотреть все поступившие обращения",
+                icon = Icons.Filled.Layers,
+                onClick = onOpenListOfReports,
+                color = MaterialTheme.colorScheme.secondaryContainer
+            )
+            HomeCard(
+                title = "Список всех карточек нарушений",
+                description = "Просмотреть созданные карточки нарушений",
+                icon = Icons.Filled.Folder,
+                onClick = onOpenListOfViolationCards,
+                color = MaterialTheme.colorScheme.errorContainer
             )
         }
 
