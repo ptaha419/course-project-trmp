@@ -13,9 +13,11 @@ import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.data.mappers.toDomain
 import com.example.ecomonitorapp.data.mappers.toDomainOrNull
 import com.example.ecomonitorapp.data.mappers.toEntity
+import com.example.ecomonitorapp.data.mappers.toUser
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ReportStatus
+import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationStatus
 import com.example.ecomonitorapp.models.ViolationType
@@ -61,6 +63,9 @@ class ReportRepository(private val context: Context,
     }
 
     fun getCurrentUserId(): Long? = session.getCurrentUserIdOrNull()
+
+    suspend fun getUserById(id: Long): User? =
+        userDao.getById(id)?.toUser()
 
     suspend fun getReportsByUser(): List<Report?> =
         dao.getByUserId(session.currentUserId).map { it.toDomainOrNull() }

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationStatus
+import com.example.ecomonitorapp.ui.viewmodels.violationCards.CardWithReport
 import com.example.ecomonitorapp.ui.viewmodels.violationCards.ViolationCardState
 import com.example.ecomonitorapp.ui.viewmodels.violationCards.ViolationCardViewModel
 import kotlinx.datetime.format
@@ -61,7 +63,7 @@ fun ViolationCardScreen(
             when (val s = state) {
                 is ViolationCardState.Loading -> CircularProgressIndicator()
                 is ViolationCardState.Error -> Text("Карточка не найдена")
-                is ViolationCardState.Success -> CardContent(s.violationCard, Modifier.fillMaxSize())
+                is ViolationCardState.Success -> CardContent(s.data, Modifier.fillMaxSize())
                 ViolationCardState.Idle -> Unit
             }
         }
@@ -69,7 +71,10 @@ fun ViolationCardScreen(
 }
 
 @Composable
-private fun CardContent(card: ViolationCard, modifier: Modifier = Modifier) {
+private fun CardContent(data: CardWithReport, modifier: Modifier = Modifier) {
+    val card = data.card
+    val report = data.report
+
     val (statusText, statusColor) = when (card.status) {
         ViolationStatus.LIQUIDATED -> card.status.displayName to MaterialTheme.colorScheme.tertiary
         else -> card.status.displayName to MaterialTheme.colorScheme.onBackground
@@ -82,13 +87,28 @@ private fun CardContent(card: ViolationCard, modifier: Modifier = Modifier) {
         Text("Карточка №${card.id}", style = MaterialTheme.typography.titleLarge)
 
         Row {
-            Text("Статус: ")
+            Text("Статус карточки: ")
             Text(text = statusText, color = statusColor)
         }
 
-        Text(
-            "Проверил: пользователь №${card.verifiedBy}",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        HorizontalDivider()
+
+        // данные обращения
+        Text("Обращение №${report.id}", style = MaterialTheme.typography.titleMedium)
+        Text("Тип нарушения: ${report.violationType.displayName}")
+        Text("Приоритет: ${report.reportPriority.displayName}")
+        Text("Описание: ${report.description}")
+
+        report.geoLoc?.let {
+            Text("Местоположение: ${it.latitude}, ${it.longitude}")
+        }
+
+        val verifierName = data.verifiedBy?.let {
+            listOfNotNull(it.lastName, it.firstName, it.middleName)
+                .joinToString(" ")
+                .ifBlank { "неизвестен" }
+        } ?: "неизвестен"
+
+        Text("Проверил: $verifierName", style = MaterialTheme.typography.bodyMedium)
     }
 }
