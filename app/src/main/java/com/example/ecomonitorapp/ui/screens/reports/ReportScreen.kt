@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.data.managers.GeoLocationManager
 import com.example.ecomonitorapp.data.mappers.toPriority
+import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.ViolationType
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportState
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
@@ -91,10 +92,18 @@ fun ReportScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state) {
-        when (state) {
+        when (val s = state) {
             is ReportState.Error ->
-                snackbarHostState.showSnackbar((state as ReportState.Error).message)
+                snackbarHostState.showSnackbar(s.message)
             is ReportState.Success -> onBack()
+            ReportState.Rejected -> {
+                snackbarHostState.showSnackbar("Обращение отклонено")
+                onBack()
+            }
+            ReportState.ViolationCardCreated -> {
+                snackbarHostState.showSnackbar("Карточка нарушения создана")
+                onBack()
+            }
             else -> Unit
         }
     }
@@ -246,6 +255,36 @@ private fun ReportForm(
             ) {
                 Text(if (form.photo != null) "Фото выбрано ✓" else "Прикрепить фото")
             }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = vm::saveDraft,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(if (draftSaved) "Сохранено" else "В черновик")
+                    if (draftSaved) {
+                        Icon(Icons.Default.Check, contentDescription = null)
+                        Spacer(Modifier.width(4.dp))
+                    }
+                }
+
+                // сбрасываем состояние через пару секунд
+                LaunchedEffect(draftSaved) {
+                    if (draftSaved) {
+                        kotlinx.coroutines.delay(2000)
+                        vm.resetDraftSaved()   // _draftSaved.value = false
+                    }
+                }
+
+                Button(
+                    onClick = vm::submit,
+                    enabled = form.canSubmit,
+                    modifier = Modifier.weight(1f)
+                ) { Text("Отправить") }
+            }
         } else {
             if (form.geoLoc != null) {
                 Text(
@@ -287,35 +326,48 @@ private fun ReportForm(
             }
         }
 
-        if (!viewOnly) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = vm::saveDraft,
-                    modifier = Modifier.weight(1f)
+        if (viewOnly) {
+            val report = vm.loadedReport.collectAsStateWithLifecycle().value
+            val actionable = report != null &&
+                    report.status != ReportStatus.REJECTED &&
+                    report.status != ReportStatus.ACCEPTED
+
+            if (actionable) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(if (draftSaved) "Сохранено" else "В черновик")
-                    if (draftSaved) {
-                        Icon(Icons.Default.Check, contentDescription = null)
-                        Spacer(Modifier.width(4.dp))
+                    OutlinedButton(
+                        onClick = { vm.rejectReport() },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Отклонить") }
+
+                    Button(
+                        onClick = { vm.createViolationCard() },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Создать карточку") }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text("Статус обращения:")
+
+                    report?.status?.let { status ->
+                        val (text, color) = when (status) {
+                            ReportStatus.ACCEPTED -> status.displayName to MaterialTheme.colorScheme.tertiary
+                            ReportStatus.REJECTED -> status.displayName to MaterialTheme.colorScheme.error
+                            else -> status.displayName to MaterialTheme.colorScheme.onBackground
+                        }
+
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = color
+                        )
                     }
                 }
-
-                // сбрасываем состояние через пару секунд
-                LaunchedEffect(draftSaved) {
-                    if (draftSaved) {
-                        kotlinx.coroutines.delay(2000)
-                        vm.resetDraftSaved()   // _draftSaved.value = false
-                    }
-                }
-
-                Button(
-                    onClick = vm::submit,
-                    enabled = form.canSubmit,
-                    modifier = Modifier.weight(1f)
-                ) { Text("Отправить") }
             }
         }
     }

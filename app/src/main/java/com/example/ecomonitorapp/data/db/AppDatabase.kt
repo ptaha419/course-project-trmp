@@ -16,7 +16,7 @@ import com.example.ecomonitorapp.data.entities.ViolationCardEntity
     ReportEntity::class,
     ViolationCardEntity::class,
     NotificationEntity::class],
-    version = 3)
+    version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun reportDao(): ReportDao

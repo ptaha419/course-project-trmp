@@ -24,6 +24,8 @@ sealed interface ReportState {
     data object Idle : ReportState
     data object Loading : ReportState
     data object DraftSaved : ReportState
+    data object Rejected: ReportState
+    data object ViolationCardCreated: ReportState
     data class Success(val report: Report) : ReportState
     data class Error(val message: String) : ReportState
 }
@@ -47,7 +49,6 @@ data class ReportFormState(
 class ReportViewModel(
     private val repository: ReportRepository,
 ) : ViewModel() {
-
     private val _stateFlow = MutableStateFlow<ReportState>(ReportState.Idle)
     val stateFlow: StateFlow<ReportState> = _stateFlow.asStateFlow()
 
@@ -63,6 +64,9 @@ class ReportViewModel(
     // флаг для сохранения обращения в черновик
     private val _draftSaved = MutableStateFlow(false)
     val draftSaved = _draftSaved.asStateFlow()
+
+    private val viewingReportId = MutableStateFlow<Long?>(null)
+    val loadedReport = MutableStateFlow<Report?>(null)
 
     fun onViolationTypeChange(raw: String?) {
         _formFlow.update { it.copy(violationType = parseViolationType(raw)) }
@@ -82,26 +86,52 @@ class ReportViewModel(
 
     fun loadReport(id: Long) = viewModelScope.launch {
         val report = repository.getReportById(id) ?: return@launch
-        _viewOnly.value = true  // только просмотр
-        editingDraftId.value = null  // не привязываем к черновику
-        onViolationTypeChange(report.violationType)
+        _viewOnly.value = true
+        editingDraftId.value = null
+        viewingReportId.value = id
+        loadedReport.value = report
+        onViolationTypeChange(report.violationType.name)
         onDescriptionChange(report.description)
-        val lat = report.latitude
-        val lng = report.longitude
-        if (lat != null && lng != null) onGeoLocChange(GeoLoc(lat, lng))
+        report.geoLoc?.let { geo -> onGeoLocChange(geo) }
         onPhotoChange(report.photo)
     }
 
     fun reset() {
         _viewOnly.value = false
         editingDraftId.value = null
+        viewingReportId.value = null
+        loadedReport.value = null
         _formFlow.value = ReportFormState()
         _stateFlow.value = ReportState.Idle
     }
 
-//    fun resetViewOnly() {
-//        _viewOnly.value = false
-//    }
+    fun rejectReport(onSuccess: () -> Unit = {}) = viewModelScope.launch {
+        val id = viewingReportId.value ?: return@launch
+        _stateFlow.value = ReportState.Loading
+        _stateFlow.value = if (repository.rejectReport(id)) {
+            onSuccess()
+            ReportState.Rejected
+        } else {
+            ReportState.Error("Не удалось отклонить обращение")
+        }
+    }
+
+    fun createViolationCard(onSuccess: () -> Unit = {}) = viewModelScope.launch {
+        val id = viewingReportId.value ?: return@launch
+        val userId = repository.getCurrentUserId()
+        if (userId == null) {
+            _stateFlow.value = ReportState.Error("Пользователь не авторизован")
+            return@launch
+        }
+
+        _stateFlow.value = ReportState.Loading
+        _stateFlow.value = if (repository.createViolationCard(id, userId) != null) {
+            onSuccess()
+            ReportState.ViolationCardCreated
+        } else {
+            ReportState.Error("Не удалось создать карточку нарушения")
+        }
+    }
 
     fun saveDraft() = viewModelScope.launch {
         val form = _formFlow.value
