@@ -48,9 +48,11 @@ import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
 import com.example.ecomonitorapp.ui.screens.reports.AllReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.MyReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
+import com.example.ecomonitorapp.ui.screens.violationCards.ViolationCardScreen
 import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
+import com.example.ecomonitorapp.ui.viewmodels.violationCards.ViolationCardViewModel
 import kotlinx.coroutines.launch
 
 // Модель раздела меню
@@ -80,6 +82,7 @@ fun MainScreen(repository: UserRepository) {
         currentRoute == "report" -> "Новое обращение"
         currentRoute == "allReports" -> "Список обращений"
         currentRoute == "myReports" -> "Мои обращения"
+        currentRoute?.startsWith("violation_card") == true -> "Карточка нарушения"
         else -> "EcoMonitorApp"
     }
 
@@ -234,8 +237,13 @@ fun MainScreen(repository: UserRepository) {
                         val reportId = entry.arguments?.getLong("reportId") ?: -1L
                         if (reportId != -1L) vm.loadReport(reportId)
                     }
-                    ReportScreen(vm = vm, onBack = { navController.popBackStack() })
+                    ReportScreen(
+                        vm = vm,
+                        onBack = { navController.popBackStack() },
+                        onOpenCard = { cardId -> navController.navigate("violation_card/$cardId") },  // ← добавили
+                    )
                 }
+
                 composable(
                     "report?draftId={draftId}",
                     arguments = listOf(
@@ -250,7 +258,22 @@ fun MainScreen(repository: UserRepository) {
                         val draftId = entry.arguments?.getLong("draftId") ?: -1L
                         if (draftId != -1L) vm.loadDraft(draftId)
                     }
-                    ReportScreen(vm = vm, onBack = { navController.popBackStack() })
+                    ReportScreen(
+                        vm = vm,
+                        onBack = { navController.popBackStack() },
+                        onOpenCard = { cardId -> navController.navigate("violation_card/$cardId") },  // ← добавили
+                    )
+                }
+                composable(
+                    "violation_card/{cardId}",
+                    arguments = listOf(navArgument("cardId") { type = NavType.LongType })
+                ) { entry ->
+                    val vm: ViolationCardViewModel = viewModel(factory = ViolationCardViewModel.factory(LocalContext.current))
+                    ViolationCardScreen(
+                        vm = vm,
+                        cardId = entry.arguments?.getLong("cardId") ?: return@composable,
+                        onBack = { navController.popBackStack() },
+                    )
                 }
             }
         }

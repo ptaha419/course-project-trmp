@@ -16,6 +16,7 @@ import com.example.ecomonitorapp.data.mappers.toEntity
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ReportStatus
+import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationStatus
 import com.example.ecomonitorapp.models.ViolationType
 import kotlinx.coroutines.flow.Flow
@@ -157,4 +158,10 @@ class ReportRepository(private val context: Context,
     } catch (e: Exception) {
         null
     }
+
+    suspend fun getViolationCardById(id: Long): ViolationCard? =
+        violationCardDao.getById(id)?.toDomain()
+
+    suspend fun getCardByReportId(reportId: Long): ViolationCard? =
+        violationCardDao.getByReportId(reportId)?.toDomain()
 }

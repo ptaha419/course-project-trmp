@@ -44,7 +44,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -54,7 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.data.managers.GeoLocationManager
 import com.example.ecomonitorapp.data.mappers.toPriority
+import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportStatus
+import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationType
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportState
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
@@ -70,6 +71,7 @@ fun ReportScreen(
     openReportId: Long? = null,
     openDraftId: Long? = null,
     initialViolationType: String? = null,
+    onOpenCard: (Long) -> Unit = {},
     onBack: () -> Unit,
 ) {
     LaunchedEffect(initialViolationType) {
@@ -101,8 +103,9 @@ fun ReportScreen(
                 onBack()
             }
             ReportState.ViolationCardCreated -> {
+                val newCardId = vm.existingCardId.value
                 snackbarHostState.showSnackbar("Карточка нарушения создана")
-                onBack()
+                newCardId?.let(onOpenCard) ?: onBack()
             }
             else -> Unit
         }
@@ -114,7 +117,7 @@ fun ReportScreen(
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
             when (state) {
                 is ReportState.Loading -> CircularProgressIndicator()
-                else -> ReportForm(vm = vm, modifier = Modifier.fillMaxSize())
+                else -> ReportForm(vm = vm, onOpenCard = onOpenCard, modifier = Modifier.fillMaxSize())
             }
         }
     }
@@ -137,6 +140,7 @@ private fun copyPhotoToInternal(context: Context, uri: Uri): String? =
 @Composable
 private fun ReportForm(
     vm: ReportViewModel,
+    onOpenCard: (Long) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val form by vm.formFlow.collectAsStateWithLifecycle()
@@ -157,9 +161,10 @@ private fun ReportForm(
     }
 
     val draftSaved by vm.draftSaved.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
 
     val viewOnly by vm.viewOnly.collectAsStateWithLifecycle()
+
+    val cardId by vm.existingCardId.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -328,44 +333,69 @@ private fun ReportForm(
 
         if (viewOnly) {
             val report = vm.loadedReport.collectAsStateWithLifecycle().value
-            val actionable = report != null &&
-                    report.status != ReportStatus.REJECTED &&
-                    report.status != ReportStatus.ACCEPTED
 
-            if (actionable) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = { vm.rejectReport() },
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Отклонить") }
+            if (cardId != null) {
+                // карточка уже создана — показываем ссылку на неё
+                OutlinedButton(
+                    onClick = { cardId?.let(onOpenCard) },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Открыть карточку нарушения") }
 
-                    Button(
-                        onClick = { vm.createViolationCard() },
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Создать карточку") }
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text("Статус обращения:")
-
-                    report?.status?.let { status ->
+                // статус оставляем видимым под ссылкой
+                report?.status?.let { status ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text("Статус обращения:")
                         val (text, color) = when (status) {
                             ReportStatus.ACCEPTED -> status.displayName to MaterialTheme.colorScheme.tertiary
                             ReportStatus.REJECTED -> status.displayName to MaterialTheme.colorScheme.error
                             else -> status.displayName to MaterialTheme.colorScheme.onBackground
                         }
+                        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = color)
+                    }
+                }
+            } else {
+                val actionable = report != null &&
+                        report.status != ReportStatus.REJECTED &&
+                        report.status != ReportStatus.ACCEPTED &&
+                        cardId == null
 
-                        Text(
-                            text = text,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = color
-                        )
+                if (actionable) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { vm.rejectReport() },
+                            modifier = Modifier.weight(1f)
+                        ) { Text("Отклонить") }
+
+                        Button(
+                            onClick = { vm.createViolationCard() },
+                            modifier = Modifier.weight(1f)
+                        ) { Text("Создать карточку") }
+                    }
+                } else {
+                    // статус
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text("Статус обращения:")
+                        report?.status?.let { status ->
+                            val (text, color) = when (status) {
+                                ReportStatus.ACCEPTED -> status.displayName to MaterialTheme.colorScheme.tertiary
+                                ReportStatus.REJECTED -> status.displayName to MaterialTheme.colorScheme.error
+                                else -> status.displayName to MaterialTheme.colorScheme.onBackground
+                            }
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = color
+                            )
+                        }
                     }
                 }
             }

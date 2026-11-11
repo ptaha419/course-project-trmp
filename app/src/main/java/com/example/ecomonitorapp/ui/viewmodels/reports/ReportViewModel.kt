@@ -68,6 +68,9 @@ class ReportViewModel(
     private val viewingReportId = MutableStateFlow<Long?>(null)
     val loadedReport = MutableStateFlow<Report?>(null)
 
+    private val _existingCardId = MutableStateFlow<Long?>(null)
+    val existingCardId = _existingCardId.asStateFlow()
+
     fun onViolationTypeChange(raw: String?) {
         _formFlow.update { it.copy(violationType = parseViolationType(raw)) }
     }
@@ -94,6 +97,7 @@ class ReportViewModel(
         onDescriptionChange(report.description)
         report.geoLoc?.let { geo -> onGeoLocChange(geo) }
         onPhotoChange(report.photo)
+        _existingCardId.value = repository.getCardByReportId(id)?.id
     }
 
     fun reset() {
@@ -103,6 +107,7 @@ class ReportViewModel(
         loadedReport.value = null
         _formFlow.value = ReportFormState()
         _stateFlow.value = ReportState.Idle
+        _existingCardId.value = null
     }
 
     fun rejectReport(onSuccess: () -> Unit = {}) = viewModelScope.launch {
@@ -125,7 +130,9 @@ class ReportViewModel(
         }
 
         _stateFlow.value = ReportState.Loading
-        _stateFlow.value = if (repository.createViolationCard(id, userId) != null) {
+        val createdId = repository.createViolationCard(id, userId)
+        _stateFlow.value = if (createdId != null) {
+            _existingCardId.value = createdId
             onSuccess()
             ReportState.ViolationCardCreated
         } else {
