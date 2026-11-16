@@ -50,6 +50,7 @@ interface ReportDao {
         SELECT r.id AS reportId,
                r.latitude, r.longitude,
                r.violation_type AS violationType,
+               r.report_priority AS reportPriority,
                c.id AS cardId,
                c.status AS cardStatus
         FROM report r

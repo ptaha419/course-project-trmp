@@ -1,5 +1,7 @@
 package com.example.ecomonitorapp.ui.screens
 
+import com.example.ecomonitorapp.R
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -8,13 +10,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.data.repositories.ReportRepository
+import com.example.ecomonitorapp.models.MapPoint
+import com.example.ecomonitorapp.models.ReportPriority
+import com.example.ecomonitorapp.models.ViolationStatus
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -55,7 +63,6 @@ fun MapScreen(
         }
     }
 
-    // жизненный цикл: onResume/onPause/onDetach — то, что в Activity делали руками
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -76,27 +83,50 @@ fun MapScreen(
     LaunchedEffect(points) {
         map.overlays.removeAll { it is Marker }
         points.forEach { point ->
+            val drawable = ContextCompat.getDrawable(context, R.drawable.ic_marker_pin)!!
+                .mutate() // без mutate() tint покрасит ОБЩИЙ drawable и все маркеры станут одного цвета
+            drawable.setTint(markerColor(point).toArgb())
+
             val marker = Marker(map).apply {
                 position = GeoPoint(point.latitude, point.longitude)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                icon = drawable
                 title = point.violationType.displayName
                 snippet = buildString {
-                    append("Широта: %.5f, Долгота: %.5f".format(point.latitude, point.longitude))
+                    append("Приоритет: ${point.reportPriority.displayName}")
+                    append("\nШирота: %.5f, Долгота: %.5f".format(point.latitude, point.longitude))
                     point.cardStatus?.let { append("\nСтатус: ${it.displayName}") }
                 }
                 setOnMarkerClickListener { m, _ ->
-                    if (m.isInfoWindowShown) m.closeInfoWindow() else m.showInfoWindow()
-                    point.cardId?.let { clickCallback(it) }
+                    if (!m.isInfoWindowShown) {
+                        m.showInfoWindow()
+                    } else {
+                        m.closeInfoWindow()
+                        val cardId = point.cardId
+                        if (cardId != null) clickCallback(cardId)
+                        else Toast.makeText(
+                            context,
+                            "К этому обращению карточка ещё не создана",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                     true
                 }
             }
             map.overlays.add(marker)
         }
-        map.invalidate()
     }
 
     AndroidView(
         factory = { map },
         modifier = modifier.fillMaxSize()
     )
+}
+
+private fun markerColor(point: MapPoint): Color = when {
+    point.cardId == null -> Color(0xFFFFFFFF)                       // просто обращение
+    point.cardStatus == ViolationStatus.LIQUIDATED -> Color(0xFF616161) // ликвидировано
+    point.reportPriority == ReportPriority.HIGH -> Color(0xFFD32F2F)      // красный
+    point.reportPriority == ReportPriority.MEDIUM -> Color(0xFFF57C00)    // оранжевый
+    else -> Color(0xFF388E3C)                                       // зелёный
 }

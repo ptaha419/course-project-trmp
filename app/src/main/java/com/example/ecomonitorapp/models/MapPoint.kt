@@ -5,6 +5,7 @@ data class MapPoint(
     val latitude: Double,
     val longitude: Double,
     val violationType: ViolationType,
+    val reportPriority: ReportPriority,
     val cardId: Long?,
     val cardStatus: ViolationStatus?,
 )
