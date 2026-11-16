@@ -3,9 +3,14 @@ package com.example.ecomonitorapp.data.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ColumnInfo
+import androidx.room.Index
 import com.example.ecomonitorapp.models.UserRole
 
-@Entity(tableName = "user")
+@Entity(tableName = "user", indices = [
+    Index(value = ["email"], unique = true),
+    Index(value = ["phone_number"], unique = true),
+    Index(value = ["passport"], unique = true)
+])
 data class UserEntity(
     @PrimaryKey(autoGenerate = true) val id: Long? = null,
     @ColumnInfo(name = "email") val email: String,

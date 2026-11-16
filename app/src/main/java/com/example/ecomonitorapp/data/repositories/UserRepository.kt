@@ -46,6 +46,10 @@ class UserRepository(private val context: Context) {
         }
     }
 
+    // проверки при регистрации
+    suspend fun isEmailTaken(email: String): Boolean = dao.getByEmail(email) != null
+    suspend fun isPhoneTaken(phone: String): Boolean = dao.getByPhone(phone) != null
+
     // Авторизация пользователя
     suspend fun loginUser(email: String): UserEntity? = dao.getByEmail(email)
 

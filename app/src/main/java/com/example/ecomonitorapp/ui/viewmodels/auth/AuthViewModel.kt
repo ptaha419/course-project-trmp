@@ -21,26 +21,62 @@ sealed class AuthState {
     data class Error(val message: String) : AuthState()
 }
 
+data class RegisterFieldErrors(
+    val email: String? = null,
+    val phone: String? = null,
+    val password: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val passport: String? = null
+)
+
 // инициализация ViewModel и StateFlow
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = UserRepository(application.applicationContext)
     private val _stateFlow = MutableStateFlow<AuthState>(AuthState.Idle)
     val stateFlow = _stateFlow.asStateFlow()
 
-    fun register(email: String, firstName: String, middleName: String?, lastName: String,
-                 phoneNumber: String, passport: String, password: String) {
-        viewModelScope.launch {
-            _stateFlow.value = AuthState.Loading
-            val passwordHash = hashPassword(password)
+    private val _fieldErrors = MutableStateFlow(RegisterFieldErrors())
+    val fieldErrors = _fieldErrors.asStateFlow()
 
-            // получаем существующего пользователя
+    fun register(
+        email: String,
+        firstName: String,
+        middleName: String?,
+        lastName: String,
+        phoneNumber: String,
+        passport: String,
+        password: String
+    ) {
+        viewModelScope.launch {
+            if (!validateFields(email, firstName, lastName, phoneNumber, passport, password)) return@launch
+
+            val normalizedEmail = email.trim().lowercase()
+            val normalizedPhone = phoneNumber.filter { it.isDigit() || it == '+' }
+
+            _stateFlow.value = AuthState.Loading
+
+            val emailTaken = repository.isEmailTaken(normalizedEmail)
+            val phoneTaken = repository.isPhoneTaken(normalizedPhone)
+
+            if (emailTaken || phoneTaken) {
+                _fieldErrors.value = _fieldErrors.value.copy(
+                    email = if (emailTaken) "Аккаунт с такой почтой уже зарегистрирован" else null,
+                    phone = if (phoneTaken) "Этот номер телефона уже используется" else null
+                )
+                _stateFlow.value = AuthState.Idle
+                return@launch
+            }
+
+            val passwordHash = hashPassword(password)
             val registeredUser = repository.registerUser(
-                email, firstName, middleName, lastName, phoneNumber, passport, passwordHash
+                normalizedEmail, firstName, middleName, lastName,
+                normalizedPhone, passport, passwordHash
             )
 
             if (registeredUser != null) {
                 val domainUser = User(
-                    id = registeredUser.id!!, // используем реальный id, а не null
+                    id = registeredUser.id!!,
                     email = registeredUser.email,
                     firstName = registeredUser.firstName,
                     middleName = registeredUser.middleName,
@@ -88,7 +124,49 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun reset() {
         _stateFlow.value = AuthState.Idle
     }
+
+    fun validateFields(
+        email: String, firstName: String, lastName: String,
+        phoneNumber: String, passport: String, password: String
+    ): Boolean {
+        val errors = RegisterFieldErrors(
+            email = when {
+                email.isBlank() -> "Введите email"
+                !email.matches(Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) -> "Некорректный email"
+                else -> null
+            },
+            phone = when {
+                phoneNumber.isBlank() -> "Введите номер телефона"
+                !Regex("^\\+?[78]?\\d{10}$").matches(phoneNumber.filter { it.isDigit() || it == '+' }) -> "Некорректный номер"
+                else -> null
+            },
+            password = when {
+                password.length < 6 -> "Минимум 6 символов"
+                else -> null
+            },
+            firstName = if (firstName.isBlank()) "Введите имя" else null,
+            lastName = if (lastName.isBlank()) "Введите фамилию" else null,
+            passport = if (passport.isBlank()) "Введите данные паспорта" else null
+        )
+        _fieldErrors.value = errors
+        return errors.email == null && errors.phone == null &&
+                errors.password == null && errors.firstName == null &&
+                errors.lastName == null && errors.passport == null
+    }
+
+
+    fun clearError(field: String) {
+        val current = _fieldErrors.value
+        _fieldErrors.value = when (field) {
+            "email" -> current.copy(email = null)
+            "phone" -> current.copy(phone = null)
+            "passport" -> current.copy(passport = null)
+            else -> current
+        }
+    }
 }
+
+
 
 // функция для хэширования пароля методом SHA-256
 private fun hashPassword(password: String): String {

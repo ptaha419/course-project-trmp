@@ -24,9 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.ecomonitorapp.ui.viewmodels.auth.AuthViewModel
 
 @Composable
 fun RegisterForm(
+    vm: AuthViewModel,
     onRegister: (
         email: String,
         firstName: String,
@@ -47,6 +50,8 @@ fun RegisterForm(
     var password by remember { mutableStateOf("") }
 
     var errMessage by remember {mutableStateOf<String?>(null)}
+
+    val errors by vm.fieldErrors.collectAsStateWithLifecycle()
 
     // проверка данных перед отправкой
     fun validateAndSubmit() {
@@ -107,9 +112,11 @@ fun RegisterForm(
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { email = it; vm.clearError("email") },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
+            isError = errors.email != null,
+            supportingText = { errors.email?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
 
@@ -136,17 +143,22 @@ fun RegisterForm(
 
         OutlinedTextField(
             value = phoneNumber,
-            onValueChange = { phoneNumber = it },
+            onValueChange = { phoneNumber = it; vm.clearError("phone") },
             label = { Text("Телефон") },
             modifier = Modifier.fillMaxWidth(),
+            isError = errors.phone != null,
+            supportingText = { errors.phone?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
         )
 
         OutlinedTextField(
             value = passport,
-            onValueChange = { passport = it },
+            onValueChange = { passport = it; vm.clearError("passport") },
             label = { Text("Паспорт (серия и номер)") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = errors.passport != null,
+            supportingText = { errors.passport?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         OutlinedTextField(

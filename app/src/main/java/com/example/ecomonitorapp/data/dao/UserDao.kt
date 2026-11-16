@@ -9,6 +9,13 @@ import com.example.ecomonitorapp.data.entities.UserEntity
 
 @Dao
 interface UserDao {
+    // проверки при регистрации
+    @Query("SELECT * FROM user WHERE email = :email LIMIT 1")
+    suspend fun getByEmail(email: String): UserEntity?
+
+    @Query("SELECT * FROM user WHERE phone_number = :phone LIMIT 1")
+    suspend fun getByPhone(phone: String): UserEntity?
+
     @Insert
     suspend fun insert(user: UserEntity): Long
 
@@ -37,9 +44,6 @@ interface UserDao {
 
 //    @Query("SELECT * FROM user WHERE email = :email AND password = :password")
 //    suspend fun login(email: String, password: String): UserEntity?
-
-    @Query("SELECT * FROM user WHERE email = :email")
-    suspend fun getByEmail(email: String): UserEntity?
 
     @Query("SELECT * FROM user WHERE id = :id")
     suspend fun getById(id: Long): UserEntity?

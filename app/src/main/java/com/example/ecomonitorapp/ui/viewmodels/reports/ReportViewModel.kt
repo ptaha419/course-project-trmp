@@ -13,8 +13,10 @@ import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ReportStatus
+import com.example.ecomonitorapp.models.UserRole
 import com.example.ecomonitorapp.models.ViolationType
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -45,6 +47,12 @@ data class ReportFormState(
                 isDescriptionValid &&
                 geoLoc != null
 }
+
+//data class ReportPermissions(
+//    val canEditForm: Boolean,     // заявитель может редактировать
+//    val canDeleteDraft: Boolean,  // applicant + status == DRAFT
+//    val canModerate: Boolean      // moderator: менять статус и приоритет
+//)
 
 class ReportViewModel(
     private val repository: ReportRepository,
