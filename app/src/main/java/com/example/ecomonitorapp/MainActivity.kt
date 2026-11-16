@@ -1,5 +1,6 @@
 package com.example.ecomonitorapp
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,43 +8,38 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
 import com.example.ecomonitorapp.ui.theme.EcoMonitorAppTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.preference.PreferenceManager
+import com.example.ecomonitorapp.data.managers.SessionManager
+import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.data.repositories.UserRepository
-import com.example.ecomonitorapp.models.UserRole
-import com.example.ecomonitorapp.ui.screens.account.AccountScreen
-import com.example.ecomonitorapp.ui.screens.HomeScreen
-import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
 import com.example.ecomonitorapp.ui.screens.auth.LoginScreen
 import com.example.ecomonitorapp.ui.screens.auth.RegisterScreen
-import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
 import com.example.ecomonitorapp.ui.screens.support.MainScreen
-import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
-import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
-import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
-import com.example.ecomonitorapp.ui.screens.support.StubScreen
+import org.osmdroid.config.Configuration
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // инициализация конфигурации osmdroid
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        Configuration.getInstance().load(applicationContext, prefs)
+        Configuration.getInstance().userAgentValue =
+            "$packageName (Android ${Build.VERSION.RELEASE})"
         setContent {
             EcoMonitorAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val navController = rememberNavController()
-                    val repository = UserRepository(applicationContext)
+
+                    val userRepository = UserRepository(applicationContext)
+                    val reportRepository =
+                        ReportRepository(applicationContext, SessionManager(applicationContext))
 
                     NavHost(
                         navController = navController,
@@ -71,7 +67,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("main") {
-                            MainScreen(repository = repository)
+                            MainScreen(
+                                userRepository = userRepository,
+                                reportRepository = reportRepository
+                            )
                         }
                     }
                 }

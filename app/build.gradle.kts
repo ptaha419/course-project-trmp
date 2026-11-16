@@ -73,4 +73,7 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.9.3")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.2")
+
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 }

@@ -41,9 +41,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.data.repositories.UserRepository
 import com.example.ecomonitorapp.models.UserRole
 import com.example.ecomonitorapp.ui.screens.HomeScreen
+import com.example.ecomonitorapp.ui.screens.MapScreen
 import com.example.ecomonitorapp.ui.screens.account.AccountScreen
 import com.example.ecomonitorapp.ui.screens.account.EditAccountScreen
 import com.example.ecomonitorapp.ui.screens.reports.AllReportsScreen
@@ -62,11 +64,12 @@ data class DrawerItem(val title: String, val icon: ImageVector, val route: Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(repository: UserRepository) {
-    val userId = repository.getCurrentUserId()
+fun MainScreen(userRepository: UserRepository,
+               reportRepository: ReportRepository,) {
+    val userId = userRepository.getCurrentUserId()
     var userRole by remember { mutableStateOf<UserRole?>(null) }
     LaunchedEffect(userId) {
-        userRole = repository.getUserRole(userId)
+        userRole = userRepository.getUserRole(userId)
     }
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -155,10 +158,10 @@ fun MainScreen(repository: UserRepository) {
                 modifier = Modifier.padding(padding)
             ) {
                 composable("home") {
-                    val userId = repository.getCurrentUserId()
+                    val userId = userRepository.getCurrentUserId()
                     var userRole by remember { mutableStateOf<UserRole?>(null) }
                     LaunchedEffect(userId) {
-                        userRole = repository.getUserRole(userId)
+                        userRole = userRepository.getUserRole(userId)
                     }
                     HomeScreen(
                         userRole = userRole,
@@ -184,7 +187,7 @@ fun MainScreen(repository: UserRepository) {
                     var userId = backStackEntry.arguments?.getLong("userId") ?: -1L
                     // если id не передали (переход из меню) — берём его из хранилища
                     if (userId == -1L) {
-                        userId = repository.getCurrentUserId()
+                        userId = userRepository.getCurrentUserId()
                     }
                     val viewModel: AccountViewModel = viewModel(
                         factory = AccountViewModel.factory(LocalContext.current.applicationContext)
@@ -209,7 +212,12 @@ fun MainScreen(repository: UserRepository) {
                     )
                 }
                 composable("map") {
-                    StubScreen("Карта города", onBack = { navController.popBackStack() })
+                    MapScreen(
+                        repository = reportRepository,
+                        onCardClick = { cardId ->
+                            navController.navigate("violationCard/$cardId")
+                        }
+                    )
                 }
                 composable("allReports") {
                     AllReportsScreen(
@@ -248,7 +256,6 @@ fun MainScreen(repository: UserRepository) {
                         onOpenCard = { cardId -> navController.navigate("violationCard/$cardId") },
                     )
                 }
-
                 composable(
                     "report?draftId={draftId}",
                     arguments = listOf(

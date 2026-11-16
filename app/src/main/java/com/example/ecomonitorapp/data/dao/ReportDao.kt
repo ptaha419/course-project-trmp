@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.ecomonitorapp.data.entities.ReportEntity
+import com.example.ecomonitorapp.models.MapPoint
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -44,4 +45,16 @@ interface ReportDao {
     // только те заявки, которые были созданы текущим пользователем
     @Query("SELECT * FROM report WHERE reported_by = :userId ORDER BY created_at DESC")
     fun observeByUser(userId: Long): Flow<List<ReportEntity>>
+
+    @Query("""
+        SELECT r.id AS reportId,
+               r.latitude, r.longitude,
+               r.violation_type AS violationType,
+               c.id AS cardId,
+               c.status AS cardStatus
+        FROM report r
+        LEFT JOIN violation_card c ON c.report = r.id
+        WHERE r.latitude IS NOT NULL AND r.longitude IS NOT NULL
+    """)
+    fun observeMapPoints(): Flow<List<MapPoint>>
 }

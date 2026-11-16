@@ -14,6 +14,7 @@ import com.example.ecomonitorapp.data.mappers.toDomain
 import com.example.ecomonitorapp.data.mappers.toDomainOrNull
 import com.example.ecomonitorapp.data.mappers.toEntity
 import com.example.ecomonitorapp.data.mappers.toUser
+import com.example.ecomonitorapp.models.MapPoint
 import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ReportStatus
@@ -167,6 +168,8 @@ class ReportRepository(private val context: Context,
     } catch (e: Exception) {
         null
     }
+
+    fun observeMapPoints(): Flow<List<MapPoint>> = dao.observeMapPoints()
 
     suspend fun getViolationCardById(id: Long): ViolationCard? =
         violationCardDao.getById(id)?.toDomain()
