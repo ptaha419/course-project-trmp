@@ -19,6 +19,7 @@ data class UserEntity(
     @ColumnInfo(name = "last_name") val lastName: String,
     @ColumnInfo(name = "phone_number") val phoneNumber: String,
     @ColumnInfo(name = "passport") val passport: String,
+    @ColumnInfo(name = "city") val city: String,
     @ColumnInfo(name = "password") val passwordHash: String?, // храним хеш
     @ColumnInfo(name = "role") val role: String = UserRole.APPLICANT.name
 )

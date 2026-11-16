@@ -34,7 +34,8 @@ fun RegisterScreen(vm: AuthViewModel = viewModel(),
     when (state) {
         is AuthState.Idle -> RegisterForm(
             vm = vm,
-            onRegister = { email, firstName, middleName, lastName, phoneNumber, passport, password ->
+            onRegister = { email, firstName, middleName, lastName,
+                           phoneNumber, passport, city, password ->
                 vm.register(
                     email = email,
                     firstName = firstName,
@@ -42,6 +43,7 @@ fun RegisterScreen(vm: AuthViewModel = viewModel(),
                     lastName = lastName,
                     phoneNumber = phoneNumber,
                     passport = passport,
+                    city = city,
                     password = password
                 )
             },

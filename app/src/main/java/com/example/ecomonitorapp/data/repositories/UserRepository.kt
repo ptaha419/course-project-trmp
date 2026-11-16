@@ -20,6 +20,7 @@ class UserRepository(private val context: Context) {
         lastName: String,
         phoneNumber: String,
         passport: String,
+        city: String,
         passwordHash: String?
     ): UserEntity? {
         return try {
@@ -31,6 +32,7 @@ class UserRepository(private val context: Context) {
                 lastName = lastName,
                 phoneNumber = phoneNumber,
                 passport = passport,
+                city = city,
                 passwordHash = passwordHash,
                 role = UserRole.APPLICANT.name
             )

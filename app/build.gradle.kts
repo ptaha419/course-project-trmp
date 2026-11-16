@@ -76,4 +76,5 @@ dependencies {
 
     implementation("org.osmdroid:osmdroid-android:6.1.20")
     implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.10.0")
 }

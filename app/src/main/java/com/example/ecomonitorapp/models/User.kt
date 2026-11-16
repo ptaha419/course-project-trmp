@@ -15,5 +15,6 @@ data class User(
     val lastName: String,
     val phoneNumber: String,
     val passport: String,
+    val city: String,
     val role: UserRole = UserRole.APPLICANT
 )

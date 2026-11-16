@@ -72,6 +72,7 @@ private fun AccountContent(user: User, onEditClick: () -> Unit) {
         InfoRow("Email", user.email)
         InfoRow("Телефон", user.phoneNumber)
         InfoRow("Паспорт", user.passport)
+        InfoRow("Город", user.city)
         InfoRow("Роль", when (user.role) {
             UserRole.APPLICANT -> "Заявитель"
             UserRole.MODERATOR -> "Модератор"

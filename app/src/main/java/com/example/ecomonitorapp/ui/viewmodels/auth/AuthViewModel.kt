@@ -27,7 +27,8 @@ data class RegisterFieldErrors(
     val password: String? = null,
     val firstName: String? = null,
     val lastName: String? = null,
-    val passport: String? = null
+    val passport: String? = null,
+    val city: String? = null
 )
 
 // инициализация ViewModel и StateFlow
@@ -46,10 +47,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         lastName: String,
         phoneNumber: String,
         passport: String,
+        city: String,
         password: String
     ) {
         viewModelScope.launch {
-            if (!validateFields(email, firstName, lastName, phoneNumber, passport, password)) return@launch
+            if (!validateFields(email, firstName, lastName, phoneNumber, passport, city, password)) return@launch
 
             val normalizedEmail = email.trim().lowercase()
             val normalizedPhone = phoneNumber.filter { it.isDigit() || it == '+' }
@@ -71,7 +73,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val passwordHash = hashPassword(password)
             val registeredUser = repository.registerUser(
                 normalizedEmail, firstName, middleName, lastName,
-                normalizedPhone, passport, passwordHash
+                normalizedPhone, passport, city, passwordHash
             )
 
             if (registeredUser != null) {
@@ -83,6 +85,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     lastName = registeredUser.lastName,
                     phoneNumber = registeredUser.phoneNumber,
                     passport = registeredUser.passport,
+                    city = registeredUser.city,
                     role = parseRole(registeredUser.role)
                 )
                 _stateFlow.value = AuthState.Success(domainUser)
@@ -108,6 +111,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         lastName = storedUser.lastName,
                         phoneNumber = storedUser.phoneNumber,
                         passport = storedUser.passport,
+                        city = storedUser.city,
                         role = parseRole(storedUser.role)
                     )
                     repository.saveCurrentUserId(storedUser.id!!)
@@ -127,7 +131,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun validateFields(
         email: String, firstName: String, lastName: String,
-        phoneNumber: String, passport: String, password: String
+        phoneNumber: String, passport: String, city: String, password: String
     ): Boolean {
         val errors = RegisterFieldErrors(
             email = when {
@@ -146,14 +150,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             },
             firstName = if (firstName.isBlank()) "Введите имя" else null,
             lastName = if (lastName.isBlank()) "Введите фамилию" else null,
-            passport = if (passport.isBlank()) "Введите данные паспорта" else null
+            passport = if (passport.isBlank()) "Введите данные паспорта" else null,
+            city = if (city.isBlank()) "Введите город" else null
         )
         _fieldErrors.value = errors
         return errors.email == null && errors.phone == null &&
                 errors.password == null && errors.firstName == null &&
-                errors.lastName == null && errors.passport == null
+                errors.lastName == null && errors.passport == null && errors.city == null
     }
-
 
     fun clearError(field: String) {
         val current = _fieldErrors.value

@@ -22,6 +22,7 @@ data class EditAccountState(
     val lastName: String = "",
     val email: String = "",
     val phoneNumber: String = "",
+    val city: String = "",
     val isSaving: Boolean = false,
     val error: String? = null,
 ) {
@@ -29,7 +30,7 @@ data class EditAccountState(
         get() = original != null && (original.firstName != firstName ||
                 original.middleName != middleName.trim().ifBlank { null } ||
                 original.lastName != lastName || original.email != email ||
-                original.phoneNumber != phoneNumber)
+                original.phoneNumber != phoneNumber || original.city != city)
 
 
     val isFirstNameValid: Boolean get() = firstName.trim().length >= 2
@@ -55,6 +56,7 @@ class EditAccountViewModel(private val repository: UserRepository) : ViewModel()
                 lastName = user.lastName,
                 email = user.email,
                 phoneNumber = user.phoneNumber,
+                city = user.city,
             ) else _stateFlow.value.copy(error = "Профиль не найден")
         }
     }
@@ -64,6 +66,7 @@ class EditAccountViewModel(private val repository: UserRepository) : ViewModel()
     fun onLastNameChange(value: String) { _stateFlow.update { it.copy(lastName = value, error = null) } }
     fun onEmailChange(value: String) { _stateFlow.update { it.copy(email = value, error = null) } }
     fun onPhoneChange(value: String) { _stateFlow.update { it.copy(phoneNumber = value, error = null) } }
+    fun onCityChange(value: String) { _stateFlow.update { it.copy(city = value, error = null) } }
 
     fun save(onSuccess: () -> Unit) {
         val state = _stateFlow.value
@@ -78,7 +81,8 @@ class EditAccountViewModel(private val repository: UserRepository) : ViewModel()
                     middleName = state.middleName.trim().ifBlank { null },
                     lastName = state.lastName.trim(),
                     email = state.email.trim(),
-                    phoneNumber = state.phoneNumber.trim())
+                    phoneNumber = state.phoneNumber.trim(),
+                    city = state.city.trim())
                 val entity = repository.getUserById(user.id)
                 if (entity != null) {
                     repository.updateUser(updated.toEntity(existing = entity))
@@ -101,7 +105,8 @@ class EditAccountViewModel(private val repository: UserRepository) : ViewModel()
                     middleName = it.middleName.orEmpty(),
                     lastName = it.lastName,
                     email = it.email,
-                    phoneNumber = it.phoneNumber)
+                    phoneNumber = it.phoneNumber,
+                    city = it.city)
             } ?: state
         }
     }

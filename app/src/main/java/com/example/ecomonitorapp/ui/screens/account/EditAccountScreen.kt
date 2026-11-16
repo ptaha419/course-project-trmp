@@ -84,6 +84,7 @@ fun EditAccountScreen(
                 onLastNameChange = vm::onLastNameChange,
                 onEmailChange = vm::onEmailChange,
                 onPhoneChange = vm::onPhoneChange,
+                onCityChange = vm::onCityChange,
                 modifier = Modifier.fillMaxSize().padding(padding)
             )
         }
@@ -98,6 +99,7 @@ private fun EditForm(
     onLastNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
+    onCityChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -154,6 +156,14 @@ private fun EditForm(
             onValueChange = onPhoneChange,
             label = { Text("Телефон") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = state.city,
+            onValueChange = onCityChange,
+            label = { Text("Город") },
+            isError = state.city.isNotEmpty(),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )

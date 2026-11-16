@@ -15,6 +15,7 @@ fun UserEntity.toUser(): User = User(
     lastName = lastName,
     phoneNumber = phoneNumber,
     passport = passport,
+    city = city,
     role = try {
         UserRole.valueOf(role)
     } catch(e: IllegalArgumentException) {
@@ -30,6 +31,7 @@ fun User.toEntity(existing: UserEntity? = null): UserEntity = UserEntity(
     lastName = lastName,
     phoneNumber = phoneNumber,
     passport = passport,
+    city = city,
     passwordHash = existing?.passwordHash, // пароль нужно менять отдельно
     role = role.name
 )

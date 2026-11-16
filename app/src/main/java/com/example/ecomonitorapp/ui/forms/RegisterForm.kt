@@ -37,6 +37,7 @@ fun RegisterForm(
         lastName: String,
         phoneNumber: String,
         passport: String,
+        city: String,
         password: String) -> Unit,
     onToLogin: () -> Unit
 ) {
@@ -47,6 +48,7 @@ fun RegisterForm(
     var lastName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var passport by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     var errMessage by remember {mutableStateOf<String?>(null)}
@@ -83,6 +85,11 @@ fun RegisterForm(
             return
         }
 
+        if (city.isBlank()) {
+            errMessage = "Город обязателен"
+            return
+        }
+
         if (password.length < 8) {
             errMessage = "Пароль должен быть не короче 8 символов"
             return
@@ -96,6 +103,7 @@ fun RegisterForm(
             lastName,
             phoneNumber,
             passport,
+            city,
             password
         )
     }
@@ -159,6 +167,13 @@ fun RegisterForm(
             isError = errors.passport != null,
             supportingText = { errors.passport?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        OutlinedTextField(
+            value = city,
+            onValueChange = { city = it },
+            label = { Text("Город") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
