@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// режим выбора точки
+enum class LocationPickerMode { Hidden, Choosing, PickingOnMap }
+
 sealed interface ReportState {
     data object Idle : ReportState
     data object Loading : ReportState
@@ -36,6 +39,7 @@ data class ReportFormState(
     val violationType: ViolationType = ViolationType.NOT_SELECTED,
     val description: String = "",
     val geoLoc: GeoLoc? = null,
+    val city: String = "",
     val photo: String? = null,
     val status: ReportStatus = ReportStatus.DRAFT
 ) {
@@ -48,12 +52,6 @@ data class ReportFormState(
                 geoLoc != null
 }
 
-//data class ReportPermissions(
-//    val canEditForm: Boolean,     // заявитель может редактировать
-//    val canDeleteDraft: Boolean,  // applicant + status == DRAFT
-//    val canModerate: Boolean      // moderator: менять статус и приоритет
-//)
-
 class ReportViewModel(
     private val repository: ReportRepository,
 ) : ViewModel() {
@@ -62,6 +60,9 @@ class ReportViewModel(
 
     private val _formFlow = MutableStateFlow(ReportFormState())
     val formFlow: StateFlow<ReportFormState> = _formFlow.asStateFlow()
+
+    private val _pickerMode = MutableStateFlow(LocationPickerMode.Hidden)
+    val pickerMode: StateFlow<LocationPickerMode> = _pickerMode.asStateFlow()
 
     // флаг для просмотра обращения
     private val _viewOnly = MutableStateFlow(false)
@@ -95,6 +96,15 @@ class ReportViewModel(
         _formFlow.update { it.copy(photo = uri) }
     }
 
+    fun showLocationPicker() { _pickerMode.value = LocationPickerMode.Choosing }
+    fun dismissLocationPicker() { _pickerMode.value = LocationPickerMode.Hidden }
+    fun startMapPick() { _pickerMode.value = LocationPickerMode.PickingOnMap }
+
+    fun confirmPickedPoint(point: GeoLoc) {
+        _formFlow.update { it.copy(geoLoc = point) }
+        _pickerMode.value = LocationPickerMode.Hidden
+    }
+
     fun loadReport(id: Long) = viewModelScope.launch {
         val report = repository.getReportById(id) ?: return@launch
         _viewOnly.value = true
@@ -113,9 +123,10 @@ class ReportViewModel(
         editingDraftId.value = null
         viewingReportId.value = null
         loadedReport.value = null
-        _formFlow.value = ReportFormState()
+        _formFlow.value = ReportFormState(city = _formFlow.value.city)
         _stateFlow.value = ReportState.Idle
         _existingCardId.value = null
+        _pickerMode.value = LocationPickerMode.Hidden // сбрасываем пикер
     }
 
     fun rejectReport(onSuccess: () -> Unit = {}) = viewModelScope.launch {

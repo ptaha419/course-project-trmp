@@ -59,7 +59,7 @@ fun MapScreen(
                 )
             )
             setMultiTouchControls(true)
-            controller.setZoom(12.0)
+            controller.setZoom(15.0)
             controller.setCenter(GeoPoint(56.136, 40.394)) // центр по умолчанию
             overlays.add(CopyrightOverlay(context))
         }

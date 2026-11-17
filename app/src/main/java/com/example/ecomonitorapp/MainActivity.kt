@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         Configuration.getInstance().load(applicationContext, prefs)
         Configuration.getInstance().userAgentValue =
-            "$packageName (Android ${Build.VERSION.RELEASE})"
+            "ViolationReport/1.0 (Android ${Build.VERSION.RELEASE}; contact@example.com)"
         setContent {
             EcoMonitorAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

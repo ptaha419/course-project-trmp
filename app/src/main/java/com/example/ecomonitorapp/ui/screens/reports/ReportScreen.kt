@@ -57,6 +57,9 @@ import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationType
+import com.example.ecomonitorapp.ui.screens.support.LocationSourceDialog
+import com.example.ecomonitorapp.ui.screens.support.MapPickerDialog
+import com.example.ecomonitorapp.ui.viewmodels.reports.LocationPickerMode
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportState
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
 import kotlinx.coroutines.Dispatchers
@@ -68,6 +71,7 @@ import java.io.IOException
 @Composable
 fun ReportScreen(
     vm: ReportViewModel,
+    userCity: String = "",
     openReportId: Long? = null,
     openDraftId: Long? = null,
     initialViolationType: String? = null,
@@ -214,7 +218,6 @@ private fun ReportForm(
             modifier = Modifier.fillMaxWidth()
         )
 
-        val context = LocalContext.current
         val permissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestMultiplePermissions()
         ) { grants ->
@@ -229,24 +232,28 @@ private fun ReportForm(
             }
         }
 
+        val pickerMode by vm.pickerMode.collectAsStateWithLifecycle()
+
+        fun detectCurrentLocation() {
+            if (GeoLocationManager.hasPermissions(context)) {
+                GeoLocationManager.getCurrentLocation(context) { geo ->
+                    vm.onGeoLocChange(geo)
+                }
+            } else {
+                permissionLauncher.launch(GeoLocationManager.requiredPermissions)
+            }
+        }
+
         if (!viewOnly) {
             OutlinedButton(
-                onClick = {
-                    if (GeoLocationManager.hasPermissions(context)) {
-                        GeoLocationManager.getCurrentLocation(context) { geo ->
-                            vm.onGeoLocChange(geo)
-                        }
-                    } else {
-                        permissionLauncher.launch(GeoLocationManager.requiredPermissions)
-                    }
-                },
+                onClick = { vm.showLocationPicker() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     if (form.geoLoc != null)
                         "Местоположение: ${form.geoLoc!!.latitude}, ${form.geoLoc!!.longitude}"
                     else
-                        "Определить местоположение"
+                        "Указать местоположение"
                 )
             }
 
@@ -399,6 +406,26 @@ private fun ReportForm(
                     }
                 }
             }
+        }
+
+        when (pickerMode) {
+            LocationPickerMode.Choosing -> LocationSourceDialog(
+                onAuto = {
+                    vm.dismissLocationPicker()
+                    detectCurrentLocation()
+                },
+                onMap = { vm.startMapPick() },
+                onDismiss = { vm.dismissLocationPicker() }
+            )
+
+            LocationPickerMode.PickingOnMap -> MapPickerDialog(
+                userCity = form.city,
+                initialPoint = form.geoLoc,
+                onConfirm = { vm.confirmPickedPoint(it) },
+                onDismiss = { vm.dismissLocationPicker() }
+            )
+
+            LocationPickerMode.Hidden -> Unit
         }
     }
 }
