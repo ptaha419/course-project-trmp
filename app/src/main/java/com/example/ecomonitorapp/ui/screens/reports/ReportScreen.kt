@@ -24,7 +24,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -121,7 +123,7 @@ fun ReportScreen(
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
             when (state) {
                 is ReportState.Loading -> CircularProgressIndicator()
-                else -> ReportForm(vm = vm, onOpenCard = onOpenCard, modifier = Modifier.fillMaxSize())
+                else -> ReportForm(vm = vm, onOpenCard = onOpenCard, onBack = onBack, modifier = Modifier.fillMaxSize())
             }
         }
     }
@@ -145,6 +147,7 @@ private fun copyPhotoToInternal(context: Context, uri: Uri): String? =
 private fun ReportForm(
     vm: ReportViewModel,
     onOpenCard: (Long) -> Unit = {},
+    onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val form by vm.formFlow.collectAsStateWithLifecycle()
@@ -167,6 +170,8 @@ private fun ReportForm(
     }
 
     val draftSaved by vm.draftSaved.collectAsState()
+
+    val isEditingDraft by vm.isEditingDraft.collectAsStateWithLifecycle()
 
     val viewOnly by vm.viewOnly.collectAsStateWithLifecycle()
 
@@ -274,22 +279,36 @@ private fun ReportForm(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
-                    onClick = vm::saveDraft,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(if (draftSaved) "Сохранено" else "В черновик")
-                    if (draftSaved) {
-                        Icon(Icons.Default.Check, contentDescription = null)
+                if (isEditingDraft) {
+                    // если редактируем черновик, то вместо кнопки "в черновик" показываем "удалить"
+                    OutlinedButton(
+                        onClick = { vm.deleteDraft(onDeleted = onBack) },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null)
                         Spacer(Modifier.width(4.dp))
+                        Text("Удалить")
                     }
-                }
-
-                // сбрасываем состояние через пару секунд
-                LaunchedEffect(draftSaved) {
-                    if (draftSaved) {
-                        kotlinx.coroutines.delay(2000)
-                        vm.resetDraftSaved()   // _draftSaved.value = false
+                } else {
+                    Button(
+                        onClick = vm::saveDraft,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(if (draftSaved) "Сохранено" else "В черновик")
+                        if (draftSaved) {
+                            Icon(Icons.Default.Check, contentDescription = null)
+                            Spacer(Modifier.width(4.dp))
+                        }
+                    }
+                    // сбрасываем состояние через пару секунд
+                    LaunchedEffect(draftSaved) {
+                        if (draftSaved) {
+                            kotlinx.coroutines.delay(2000)
+                            vm.resetDraftSaved()
+                        }
                     }
                 }
 
@@ -297,7 +316,9 @@ private fun ReportForm(
                     onClick = vm::submit,
                     enabled = form.canSubmit,
                     modifier = Modifier.weight(1f)
-                ) { Text("Отправить") }
+                ) {
+                    Text("Отправить")
+                }
             }
         } else {
             if (form.geoLoc != null) {

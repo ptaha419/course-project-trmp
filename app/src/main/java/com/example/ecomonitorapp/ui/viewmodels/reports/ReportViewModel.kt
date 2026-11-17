@@ -74,6 +74,10 @@ class ReportViewModel(
     private val _draftSaved = MutableStateFlow(false)
     val draftSaved = _draftSaved.asStateFlow()
 
+    // флаг для изменения черновика
+    private val _isEditingDraft = MutableStateFlow(false)
+    val isEditingDraft: StateFlow<Boolean> = _isEditingDraft.asStateFlow()
+
     private val viewingReportId = MutableStateFlow<Long?>(null)
     val loadedReport = MutableStateFlow<Report?>(null)
 
@@ -113,6 +117,7 @@ class ReportViewModel(
         val report = repository.getReportById(id) ?: return@launch
         _viewOnly.value = true
         editingDraftId.value = null
+        _isEditingDraft.value = false
         viewingReportId.value = id
         loadedReport.value = report
         onViolationTypeChange(report.violationType.name)
@@ -126,6 +131,7 @@ class ReportViewModel(
         _isModerator.value = false
         _viewOnly.value = false
         editingDraftId.value = null
+        _isEditingDraft.value = false
         viewingReportId.value = null
         loadedReport.value = null
         _formFlow.value = ReportFormState(city = _formFlow.value.city)
@@ -189,12 +195,28 @@ class ReportViewModel(
     fun loadDraft(id: Long) = viewModelScope.launch {
         val draft = repository.getDraftById(id) ?: return@launch
         editingDraftId.value = draft.id
+        _isEditingDraft.value = true
         onViolationTypeChange(draft.violationType)
         onDescriptionChange(draft.description)
         val lat = draft.latitude
         val lng = draft.longitude
         if (lat != null && lng != null) onGeoLocChange(GeoLoc(lat, lng))
         onPhotoChange(draft.photo)
+    }
+
+    // удаление черновика
+    fun deleteDraft(onDeleted: () -> Unit = {}) = viewModelScope.launch {
+        val id = editingDraftId.value ?: return@launch
+        _stateFlow.value = ReportState.Loading
+        val ok = repository.deleteReportById(id)
+        _stateFlow.value = if (ok) {
+            editingDraftId.value = null
+            _isEditingDraft.value = false
+            onDeleted()
+            ReportState.Idle
+        } else {
+            ReportState.Error("Не удалось удалить черновик")
+        }
     }
 
     fun submit(onSuccess: () -> Unit = {}) {
