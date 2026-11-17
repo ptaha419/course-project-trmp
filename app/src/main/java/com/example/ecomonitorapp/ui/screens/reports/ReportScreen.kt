@@ -151,6 +151,8 @@ private fun ReportForm(
 
     val context = LocalContext.current
 
+    val isModerator by vm.isModerator.collectAsStateWithLifecycle()
+
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -342,12 +344,14 @@ private fun ReportForm(
             val report = vm.loadedReport.collectAsStateWithLifecycle().value
 
             if (cardId != null) {
-                // карточка уже создана — показываем ссылку на неё
-                OutlinedButton(
-                    onClick = { cardId?.let(onOpenCard) },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("Открыть карточку нарушения") }
-
+                // проверка роли
+                if (isModerator) {
+                    // карточка уже создана — показываем ссылку на неё
+                    OutlinedButton(
+                        onClick = { cardId?.let(onOpenCard) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Открыть карточку нарушения") }
+                }
                 // статус оставляем видимым под ссылкой
                 report?.status?.let { status ->
                     Row(
@@ -369,7 +373,7 @@ private fun ReportForm(
                         report.status != ReportStatus.ACCEPTED &&
                         cardId == null
 
-                if (actionable) {
+                if (actionable && isModerator) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)

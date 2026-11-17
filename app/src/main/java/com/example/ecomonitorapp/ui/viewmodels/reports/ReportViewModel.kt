@@ -80,6 +80,9 @@ class ReportViewModel(
     private val _existingCardId = MutableStateFlow<Long?>(null)
     val existingCardId = _existingCardId.asStateFlow()
 
+    private val _isModerator = MutableStateFlow(false)
+    val isModerator: StateFlow<Boolean> = _isModerator.asStateFlow()
+
     fun onViolationTypeChange(raw: String?) {
         _formFlow.update { it.copy(violationType = parseViolationType(raw)) }
     }
@@ -106,6 +109,7 @@ class ReportViewModel(
     }
 
     fun loadReport(id: Long) = viewModelScope.launch {
+        _isModerator.value = repository.getCurrentUserRole() == UserRole.MODERATOR
         val report = repository.getReportById(id) ?: return@launch
         _viewOnly.value = true
         editingDraftId.value = null
@@ -119,6 +123,7 @@ class ReportViewModel(
     }
 
     fun reset() {
+        _isModerator.value = false
         _viewOnly.value = false
         editingDraftId.value = null
         viewingReportId.value = null
@@ -141,6 +146,11 @@ class ReportViewModel(
     }
 
     fun createViolationCard(onSuccess: () -> Unit = {}) = viewModelScope.launch {
+        if (repository.getCurrentUserRole() != UserRole.MODERATOR) {
+            _stateFlow.value = ReportState.Error("Создание карточек доступно только модераторам")
+            return@launch
+        }
+
         val id = viewingReportId.value ?: return@launch
         val userId = repository.getCurrentUserId()
         if (userId == null) {

@@ -98,9 +98,7 @@ fun MainScreen(userRepository: UserRepository,
         DrawerItem("Главная", Icons.Filled.Home, "home"),
         DrawerItem("Личный кабинет", Icons.Filled.Person, "account"),
         DrawerItem("Новое обращение", Icons.Filled.Add, "report"),
-        DrawerItem("Мои обращения", Icons.AutoMirrored.Filled.List, "myReports"),
-        DrawerItem("Карта города", Icons.Filled.Map, "map"),
-        DrawerItem("Карточки нарушений", Icons.Filled.Folder, "allViolationCards")
+        DrawerItem("Мои обращения", Icons.AutoMirrored.Filled.List, "myReports")
     )
 
     if (userRole == UserRole.MODERATOR) {
@@ -111,7 +109,12 @@ fun MainScreen(userRepository: UserRepository,
                 route = "allReports"
             )
         )
+        drawerItems.add(
+            DrawerItem("Карточки нарушений", Icons.Filled.Folder, "allViolationCards")
+        )
     }
+
+    drawerItems.add(DrawerItem("Карта города", Icons.Filled.Map, "map"))
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -230,7 +233,7 @@ fun MainScreen(userRepository: UserRepository,
                         userCity = userCity,
                         repository = reportRepository,
                         onCardClick = { cardId ->
-                            navController.navigate("violationCard/$cardId")
+                            if (userRole == UserRole.MODERATOR) navController.navigate("violationCard/$cardId")
                         }
                     )
                 }
@@ -292,20 +295,29 @@ fun MainScreen(userRepository: UserRepository,
                     )
                 }
                 composable("allViolationCards") {
-                    AllViolationCardsScreen(
-                        onOpenCard = { cardId -> navController.navigate("violationCard/$cardId") }
-                    )
+                    if (userRole == UserRole.MODERATOR) {
+                        AllViolationCardsScreen(
+                            onOpenCard = { cardId -> navController.navigate("violationCard/$cardId") }
+                        )
+                    } else {
+                        AccessDeniedScreen(onBack = { navController.popBackStack() })
+                    }
                 }
                 composable(
                     "violationCard/{cardId}",
                     arguments = listOf(navArgument("cardId") { type = NavType.LongType })
                 ) { entry ->
-                    val vm: ViolationCardViewModel = viewModel(factory = ViolationCardViewModel.factory(LocalContext.current))
-                    ViolationCardScreen(
-                        vm = vm,
-                        cardId = entry.arguments?.getLong("cardId") ?: return@composable,
-                        onBack = { navController.popBackStack() },
-                    )
+                    if (userRole == UserRole.MODERATOR) {
+                        val vm: ViolationCardViewModel =
+                            viewModel(factory = ViolationCardViewModel.factory(LocalContext.current))
+                        ViolationCardScreen(
+                            vm = vm,
+                            cardId = entry.arguments?.getLong("cardId") ?: return@composable,
+                            onBack = { navController.popBackStack() },
+                        )
+                    } else {
+                        AccessDeniedScreen(onBack = { navController.popBackStack() })
+                    }
                 }
             }
         }

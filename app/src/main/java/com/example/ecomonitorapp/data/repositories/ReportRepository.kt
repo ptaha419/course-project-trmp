@@ -19,6 +19,7 @@ import com.example.ecomonitorapp.models.Report
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.User
+import com.example.ecomonitorapp.models.UserRole
 import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationStatus
 import com.example.ecomonitorapp.models.ViolationType
@@ -68,6 +69,11 @@ class ReportRepository(private val context: Context,
 
     suspend fun getUserById(id: Long): User? =
         userDao.getById(id)?.toUser()
+
+    suspend fun getCurrentUserRole(): UserRole? {
+        val userId = session.getCurrentUserIdOrNull() ?: return null
+        return userDao.getById(userId)?.let { UserRole.valueOf(it.role) }
+    }
 
     suspend fun getReportsByUser(): List<Report?> =
         dao.getByUserId(session.currentUserId).map { it.toDomainOrNull() }
