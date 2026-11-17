@@ -36,10 +36,10 @@ data class EditAccountState(
     val isFirstNameValid: Boolean get() = firstName.trim().length >= 2
     val isMiddleNameValid: Boolean get() = middleName.isBlank() || middleName.trim().length >= 2
     val isLastNameValid: Boolean get() = lastName.trim().length >= 2
-
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    val isCityValid: Boolean get() = city.trim().length >= 2
     val canSave: Boolean get() = isFirstNameValid && isMiddleNameValid && isLastNameValid &&
-            isEmailValid && hasChanges && !isSaving
+            isEmailValid && isCityValid && hasChanges && !isSaving
 }
 
 class EditAccountViewModel(private val repository: UserRepository) : ViewModel() {

@@ -21,10 +21,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.ecomonitorapp.models.CityRepository
+import com.example.ecomonitorapp.ui.screens.support.CityDropdown
 import com.example.ecomonitorapp.ui.viewmodels.auth.AuthViewModel
 
 @Composable
@@ -41,6 +44,9 @@ fun RegisterForm(
         password: String) -> Unit,
     onToLogin: () -> Unit
 ) {
+    val context = LocalContext.current
+    val cities = remember { CityRepository.load(context) }
+
     // создание и сохранение объектов MutableState для отслеживания изменений их значений
     var email by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
@@ -87,6 +93,10 @@ fun RegisterForm(
 
         if (city.isBlank()) {
             errMessage = "Город обязателен"
+            return
+        }
+        if (cities.none { it.name.equals(city.trim(), ignoreCase = true) }) {
+            errMessage = "Выберите город из списка"
             return
         }
 
@@ -169,11 +179,10 @@ fun RegisterForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
-        OutlinedTextField(
+        CityDropdown(
             value = city,
             onValueChange = { city = it },
-            label = { Text("Город") },
-            modifier = Modifier.fillMaxWidth()
+            cities = cities,
         )
 
         OutlinedTextField(

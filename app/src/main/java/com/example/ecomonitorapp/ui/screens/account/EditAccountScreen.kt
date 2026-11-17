@@ -28,9 +28,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.ecomonitorapp.models.CityRepository
+import com.example.ecomonitorapp.ui.screens.support.CityDropdown
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountState
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
 
@@ -159,13 +162,14 @@ private fun EditForm(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(
+
+        val context = LocalContext.current
+        val cities = remember { CityRepository.load(context) }
+
+        CityDropdown(
             value = state.city,
             onValueChange = onCityChange,
-            label = { Text("Город") },
-            isError = state.city.isNotEmpty(),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            cities = cities,
         )
     }
 }
