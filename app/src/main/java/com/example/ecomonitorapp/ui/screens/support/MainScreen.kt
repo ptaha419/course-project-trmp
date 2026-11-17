@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -53,6 +54,7 @@ import com.example.ecomonitorapp.ui.screens.reports.MyReportsScreen
 import com.example.ecomonitorapp.ui.screens.reports.ReportScreen
 import com.example.ecomonitorapp.ui.screens.violationCards.AllViolationCardsScreen
 import com.example.ecomonitorapp.ui.screens.violationCards.ViolationCardScreen
+import com.example.ecomonitorapp.ui.viewmodels.account.AccountState
 import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.account.EditAccountViewModel
 import com.example.ecomonitorapp.ui.viewmodels.reports.ReportViewModel
@@ -212,7 +214,20 @@ fun MainScreen(userRepository: UserRepository,
                     )
                 }
                 composable("map") {
+                    val viewModel: AccountViewModel = viewModel(
+                        factory = AccountViewModel.factory(LocalContext.current.applicationContext)
+                    )
+                    val userId = userRepository.getCurrentUserId()
+
+                    LaunchedEffect(userId) {
+                        if (userId != -1L) viewModel.loadUser(userId)
+                    }
+
+                    val state by viewModel.stateFlow.collectAsStateWithLifecycle()
+                    val userCity = (state as? AccountState.Loaded)?.user?.city ?: ""
+
                     MapScreen(
+                        userCity = userCity,
                         repository = reportRepository,
                         onCardClick = { cardId ->
                             navController.navigate("violationCard/$cardId")

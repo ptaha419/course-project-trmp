@@ -64,6 +64,7 @@ class UserRepository(private val context: Context) {
                 UserRole.valueOf(entity.role)
             }
     }
+
     suspend fun updateUser(user: UserEntity): Boolean = try {
         dao.update(user)
         true

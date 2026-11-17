@@ -20,6 +20,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ecomonitorapp.data.repositories.ReportRepository
+import com.example.ecomonitorapp.models.CityRepository
 import com.example.ecomonitorapp.models.MapPoint
 import com.example.ecomonitorapp.models.ReportPriority
 import com.example.ecomonitorapp.models.ViolationStatus
@@ -31,6 +32,7 @@ import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun MapScreen(
+    userCity: String,
     repository: ReportRepository,
     onCardClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -61,6 +63,18 @@ fun MapScreen(
             controller.setCenter(GeoPoint(56.136, 40.394)) // центр по умолчанию
             overlays.add(CopyrightOverlay(context))
         }
+    }
+
+    // центр выбранного города
+    val cityCenter = remember(userCity) {
+        CityRepository.findByName(context, userCity)
+            ?.coords
+            ?.let { GeoPoint(it.lat, it.lon) }
+    }
+
+    // при изменении города перемещаем центр
+    LaunchedEffect(cityCenter) {
+        cityCenter?.let { map.controller.animateTo(it) }
     }
 
     DisposableEffect(lifecycleOwner) {

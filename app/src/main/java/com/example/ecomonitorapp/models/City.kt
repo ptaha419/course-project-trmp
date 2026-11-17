@@ -6,7 +6,13 @@ import com.google.gson.Gson
 data class City(
     val name: String,
     val subject: String?,
-    val population: Long
+    val population: Long,
+    val coords: CityCoords? = null,
+)
+
+data class CityCoords(
+    val lat: Double,
+    val lon: Double,
 )
 
 object CityRepository {
@@ -23,4 +29,7 @@ object CityRepository {
                 raw.sortedByDescending { it.population }.also { cached = it }
             }
         }
+
+    fun findByName(context: Context, name: String): City? =
+        load(context).firstOrNull { it.name.equals(name.trim(), ignoreCase = true) }
 }
