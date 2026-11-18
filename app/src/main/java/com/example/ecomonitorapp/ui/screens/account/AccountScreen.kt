@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +31,8 @@ import com.example.ecomonitorapp.ui.viewmodels.account.AccountViewModel
 fun AccountScreen(
     vm: AccountViewModel,
     userId: Long,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     LaunchedEffect(userId) {
         vm.loadUser(userId)
@@ -44,7 +46,11 @@ fun AccountScreen(
             contentAlignment = Alignment.Center
         ) { CircularProgressIndicator() }
 
-        is AccountState.Loaded -> AccountContent(user = s.user, onEditClick = onEditClick)
+        is AccountState.Loaded -> AccountContent(
+            user = s.user,
+            onEditClick = onEditClick,
+            onLogoutClick = onLogoutClick
+        )
 
         AccountState.NotFound -> Box(
             Modifier.fillMaxSize(),
@@ -56,7 +62,11 @@ fun AccountScreen(
 }
 
 @Composable
-private fun AccountContent(user: User, onEditClick: () -> Unit) {
+private fun AccountContent(
+    user: User,
+    onEditClick: () -> Unit,
+    onLogoutClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -84,6 +94,12 @@ private fun AccountContent(user: User, onEditClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Изменить данные")
+        }
+        OutlinedButton(
+            onClick = onLogoutClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Выйти", color = MaterialTheme.colorScheme.error)
         }
     }
 }

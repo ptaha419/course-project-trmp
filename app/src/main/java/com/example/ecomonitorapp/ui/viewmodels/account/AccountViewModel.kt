@@ -44,6 +44,11 @@ class AccountViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
+    fun logout(onLoggedOut: () -> Unit) {
+        repository.logout()
+        onLoggedOut()
+    }
+
     companion object {
         fun factory(context: Context) = viewModelFactory {
             initializer {

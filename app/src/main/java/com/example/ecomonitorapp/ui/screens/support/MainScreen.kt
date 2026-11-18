@@ -70,8 +70,11 @@ data class DrawerItem(val title: String, val icon: ImageVector, val route: Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(userRepository: UserRepository,
-               reportRepository: ReportRepository,) {
+fun MainScreen(
+    userRepository: UserRepository,
+    reportRepository: ReportRepository,
+    onLogout: () -> Unit
+    ) {
     val userId = userRepository.getCurrentUserId()
     var userRole by remember { mutableStateOf<UserRole?>(null) }
     LaunchedEffect(userId) {
@@ -227,7 +230,12 @@ fun MainScreen(userRepository: UserRepository,
                     AccountScreen(
                         vm = viewModel,
                         userId = userId,
-                        onEditClick = { navController.navigate("editAccount/$userId") }
+                        onEditClick = { navController.navigate("editAccount/$userId") },
+                        onLogoutClick = {
+                            viewModel.logout {
+                                onLogout()
+                            }
+                        }
                     )
                 }
                 composable(

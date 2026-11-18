@@ -55,6 +55,10 @@ class UserRepository(private val context: Context) {
     // Авторизация пользователя
     suspend fun loginUser(email: String): UserEntity? = dao.getByEmail(email)
 
+    // выход из аккаунта
+    fun logout() {
+        session.logout()
+    }
     suspend fun getUserById(id: Long): UserEntity? = dao.getById(id)
 
     suspend fun getUserRole(userId: Long): UserRole? {

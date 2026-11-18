@@ -69,7 +69,12 @@ class MainActivity : ComponentActivity() {
                         composable("main") {
                             MainScreen(
                                 userRepository = userRepository,
-                                reportRepository = reportRepository
+                                reportRepository = reportRepository,
+                                onLogout = {
+                                    navController.navigate("login") {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                }
                             )
                         }
                     }

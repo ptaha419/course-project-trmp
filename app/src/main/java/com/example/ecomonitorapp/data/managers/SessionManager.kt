@@ -11,4 +11,8 @@ class SessionManager(context: Context) {
 
     fun getCurrentUserIdOrNull(): Long? =
         currentUserId.takeIf { it != -1L }
+
+    fun logout() {
+        prefs.edit().remove("current_user_id").apply()
+    }
 }
