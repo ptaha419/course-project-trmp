@@ -9,6 +9,7 @@ import com.example.ecomonitorapp.data.managers.SessionManager
 import com.example.ecomonitorapp.data.repositories.ReportRepository
 import com.example.ecomonitorapp.data.repositories.ViolationCardRepository
 import com.example.ecomonitorapp.models.Report
+import com.example.ecomonitorapp.models.ReportStatus
 import com.example.ecomonitorapp.models.User
 import com.example.ecomonitorapp.models.ViolationCard
 import com.example.ecomonitorapp.models.ViolationStatus
@@ -55,11 +56,24 @@ class ViolationCardViewModel(
         _stateFlow.value = ViolationCardState.Idle
     }
 
+
+
     fun updateStatus(cardId: Long, newStatus: ViolationStatus) = viewModelScope.launch {
         val current = _stateFlow.value
         if (current is ViolationCardState.Success) {
-            cardRepository.updateStatus(current.data.card.id, newStatus)
-            loadCard(cardId) // перезагружаем, чтобы получить с новым статусом
+            val card = current.data.card
+
+            // блокируем изменение, если карточка уже ликвидирована
+            if (card.status == ViolationStatus.LIQUIDATED) return@launch
+
+            cardRepository.updateStatus(cardId, newStatus)
+
+            // обновляем статус обращения
+            if (newStatus == ViolationStatus.LIQUIDATED) {
+                reportRepository.updateReportStatus(card.report, ReportStatus.DONE)
+            }
+
+            loadCard(cardId)
         }
     }
 

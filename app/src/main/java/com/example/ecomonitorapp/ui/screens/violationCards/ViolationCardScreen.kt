@@ -149,7 +149,7 @@ private fun CardContent(
         ) {
             Text("Статус карточки:")
             ExposedDropdownMenuBox(
-                expanded = expanded,
+                expanded = expanded && card.status != ViolationStatus.LIQUIDATED,
                 onExpandedChange = { expanded = it }
             ) {
                 Surface(
@@ -182,7 +182,10 @@ private fun CardContent(
                             text = { Text(status.displayName) },
                             onClick = {
                                 expanded = false
-                                onStatusChange(status)
+                                // запрещаем выбор статуса "ликвидировано", если уже установлен
+                                if (card.status != ViolationStatus.LIQUIDATED) {
+                                    onStatusChange(status)
+                                }
                             }
                         )
                     }

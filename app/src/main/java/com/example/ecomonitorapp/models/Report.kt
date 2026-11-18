@@ -21,7 +21,8 @@ enum class ReportStatus(val displayName: String) {
     DRAFT("Черновик"),
     SENT("Отправлено"),
     REJECTED("Отклонено"),
-    ACCEPTED("Принято к рассмотрению")
+    ACCEPTED("Принято к рассмотрению"),
+    DONE("Выполнено")
 }
 
 data class Report (

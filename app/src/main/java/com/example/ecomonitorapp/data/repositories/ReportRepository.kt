@@ -91,6 +91,14 @@ class ReportRepository(private val context: Context,
         false
     }
 
+    suspend fun updateReportStatus(reportId: Long, status: ReportStatus): Boolean = try {
+        dao.updateStatus(reportId, status.name)
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+
     suspend fun deleteReport(report: Report): Boolean = try {
         dao.delete(report.toEntity())
         true
