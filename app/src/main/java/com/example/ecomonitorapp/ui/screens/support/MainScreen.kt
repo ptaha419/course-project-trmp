@@ -118,6 +118,12 @@ fun MainScreen(userRepository: UserRepository,
         )
     }
 
+    if (userRole == UserRole.INSPECTOR) {
+        drawerItems.add(
+            DrawerItem("Карточки нарушений", Icons.Filled.Folder, "allViolationCards")
+        )
+    }
+
     drawerItems.add(DrawerItem("Карта города", Icons.Filled.Map, "map"))
 
     ModalNavigationDrawer(
@@ -316,8 +322,9 @@ fun MainScreen(userRepository: UserRepository,
                     )
                 }
                 composable("allViolationCards") {
-                    if (userRole == UserRole.MODERATOR) {
+                    if (userRole == UserRole.MODERATOR || userRole == UserRole.INSPECTOR) {
                         AllViolationCardsScreen(
+                            isInspector = userRole == UserRole.INSPECTOR,
                             onOpenCard = { cardId -> navController.navigate("violationCard/$cardId") }
                         )
                     } else {
@@ -328,7 +335,7 @@ fun MainScreen(userRepository: UserRepository,
                     "violationCard/{cardId}",
                     arguments = listOf(navArgument("cardId") { type = NavType.LongType })
                 ) { entry ->
-                    if (userRole == UserRole.MODERATOR) {
+                    if (userRole == UserRole.MODERATOR || userRole == UserRole.INSPECTOR) {
                         val vm: ViolationCardViewModel =
                             viewModel(factory = ViolationCardViewModel.factory(LocalContext.current))
                         ViolationCardScreen(

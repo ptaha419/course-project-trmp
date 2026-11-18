@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDateTime
 enum class ViolationStatus(val displayName: String) {
     UNDER_CONSIDERATION("На рассмотрении"),
     SENT_TO_INSPECTOR("Отправлено инспектору"),
+    INSPECTOR_APPOINTED("Назначен инспектор"),
     LIQUIDATION_PROCESS("В процессе ликвидации"),
     LIQUIDATED("Ликвидировано")
 }

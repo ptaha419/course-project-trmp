@@ -61,15 +61,13 @@ fun HomeScreen(
             color = MaterialTheme.colorScheme.primaryContainer
         )
 
-        if (userRole == UserRole.APPLICANT || userRole == UserRole.MODERATOR) {
-            HomeCard(
-                title = "Мои обращения",
-                description = "Просмотреть мои отправленные обращения",
-                icon = Icons.AutoMirrored.Filled.List,
-                onClick = onOpenMyReports,
-                color = MaterialTheme.colorScheme.secondaryContainer
-            )
-        }
+        HomeCard(
+            title = "Мои обращения",
+            description = "Просмотреть мои отправленные обращения",
+            icon = Icons.AutoMirrored.Filled.List,
+            onClick = onOpenMyReports,
+            color = MaterialTheme.colorScheme.secondaryContainer
+        )
 
         if (userRole == UserRole.MODERATOR) {
             HomeCard(
@@ -79,6 +77,9 @@ fun HomeScreen(
                 onClick = onOpenListOfReports,
                 color = MaterialTheme.colorScheme.secondaryContainer
             )
+        }
+
+        if(userRole == UserRole.MODERATOR || userRole == UserRole.INSPECTOR) {
             HomeCard(
                 title = "Карточки нарушений",
                 description = "Просмотреть созданные карточки нарушений",

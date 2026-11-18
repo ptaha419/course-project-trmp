@@ -21,7 +21,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -72,6 +74,7 @@ fun ViolationCardScreen(
     DisposableEffect(Unit) { onDispose { vm.reset() } }
 
     val state by vm.stateFlow.collectAsStateWithLifecycle()
+    val isInspector by vm.isInspector.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -92,9 +95,9 @@ fun ViolationCardScreen(
                 is ViolationCardState.Success -> CardContent(
                     s.data,
                     Modifier.fillMaxSize(),
-                    onStatusChange = { newStatus ->
-                        vm.updateStatus(cardId, newStatus)
-                    }
+                    isInspector = isInspector,
+                    onStatusChange = { newStatus -> vm.updateStatus(cardId, newStatus) },
+                    onSendToInspector = { vm.sendToInspector(cardId) }
                 )
                 ViolationCardState.Idle -> Unit
             }
@@ -107,6 +110,8 @@ fun ViolationCardScreen(
 private fun CardContent(
     data: CardWithReport,
     modifier: Modifier = Modifier,
+    isInspector: Boolean,
+    onSendToInspector: () -> Unit = {},
     onStatusChange: (ViolationStatus) -> Unit = {}
     ) {
     val card = data.card
@@ -143,53 +148,73 @@ private fun CardContent(
     ) {
         Text("Карточка №${card.id}", style = MaterialTheme.typography.titleLarge)
 
+        val canChangeStatus = isInspector && card.status != ViolationStatus.LIQUIDATED
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("Статус карточки:")
-            ExposedDropdownMenuBox(
-                expanded = expanded && card.status != ViolationStatus.LIQUIDATED,
-                onExpandedChange = { expanded = it }
-            ) {
+
+            Box {
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = statusColor.copy(alpha = 0.15f),
                     contentColor = statusColor,
                     modifier = Modifier
-                        .menuAnchor()
                         .clip(RoundedCornerShape(20.dp))
-                        .clickable { }
+                        .then(
+                            if (canChangeStatus) {
+                                Modifier.clickable { expanded = true }
+                            } else Modifier
+                        )
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(statusText, style = MaterialTheme.typography.labelLarge)
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Изменить статус",
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .rotate(if (expanded) 180f else 0f) // стрелка переворачивается при открытии
-                        )
+                        if (canChangeStatus) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Изменить статус",
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .rotate(if (expanded) 180f else 0f)
+                            )
+                        }
                     }
                 }
 
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    ViolationStatus.entries.forEach { status ->
+                DropdownMenu(
+                    expanded = expanded && canChangeStatus,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    listOf(
+                        ViolationStatus.INSPECTOR_APPOINTED,
+                        ViolationStatus.LIQUIDATION_PROCESS,
+                        ViolationStatus.LIQUIDATED
+                    ).forEach { status ->
                         DropdownMenuItem(
                             text = { Text(status.displayName) },
+                            enabled = status != card.status,
                             onClick = {
                                 expanded = false
-                                // запрещаем выбор статуса "ликвидировано", если уже установлен
-                                if (card.status != ViolationStatus.LIQUIDATED) {
-                                    onStatusChange(status)
-                                }
+                                onStatusChange(status)
                             }
                         )
                     }
                 }
+            }
+        }
+
+        // кнопка для модератора и только пока карточка на рассмотрении
+        if (!isInspector && card.status == ViolationStatus.UNDER_CONSIDERATION) {
+            Button(
+                onClick = onSendToInspector,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Направить инспектору")
             }
         }
 
@@ -232,6 +257,7 @@ private fun CardContent(
 fun statusColorFor(status: ViolationStatus): Color = when (status) {
     ViolationStatus.UNDER_CONSIDERATION -> MaterialTheme.colorScheme.secondary
     ViolationStatus.SENT_TO_INSPECTOR -> MaterialTheme.colorScheme.primary
+    ViolationStatus.INSPECTOR_APPOINTED -> MaterialTheme.colorScheme.primary
     ViolationStatus.LIQUIDATION_PROCESS -> MaterialTheme.colorScheme.error
     ViolationStatus.LIQUIDATED -> MaterialTheme.colorScheme.tertiary
 }

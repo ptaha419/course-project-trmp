@@ -44,6 +44,7 @@ data class CardWithReportRow(
 
 @Composable
 fun AllViolationCardsScreen(
+    isInspector: Boolean,
     onOpenCard: (Long) -> Unit
 ) {
     val context = LocalContext.current
@@ -58,16 +59,17 @@ fun AllViolationCardsScreen(
     var selectedViolationType by remember { mutableStateOf<ViolationType?>(null) }
     var selectedViolationStatus by remember { mutableStateOf<ViolationStatus?>(null) }
 
-    val filteredCards = remember(cards, selectedPriority,
-        selectedViolationType, selectedViolationStatus) {
+    val filteredCards = remember(cards, selectedPriority, selectedViolationType, selectedViolationStatus, isInspector) {
         val priority = selectedPriority
         val type = selectedViolationType
         val status = selectedViolationStatus
         cards.filter { row ->
             row.card.id != null &&
+                    // инспектор видит карточку только после того, как её направили
+                    (!isInspector || row.card.status != ViolationStatus.UNDER_CONSIDERATION.name) &&
                     (priority == null || row.report.reportPriority == priority.name) &&
                     (type == null || row.report.violationType == type.name) &&
-                    (selectedViolationStatus == null || row.card.status == status?.name)
+                    (status == null || row.card.status == status.name)
         }
     }
 
