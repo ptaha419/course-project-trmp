@@ -1,5 +1,9 @@
 package com.example.ecomonitorapp.ui.screens.support
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -120,25 +124,42 @@ fun MainScreen(userRepository: UserRepository,
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Text(
-                    text = "EcoMonitorApp",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(16.dp)
-                )
-                HorizontalDivider()
-                drawerItems.forEach { item ->
-                    NavigationDrawerItem(
-                        label = { Text(item.title) },
-                        icon = { Icon(item.icon, contentDescription = null) },
-                        selected = currentRoute?.startsWith(item.route) == true,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            navController.navigate(item.route) {
-                                popUpTo("home") // «назад» всегда ведёт на главную
-                                launchSingleTop = true
-                            }
-                        }
+                Column(
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 12.dp)
+                ) {
+                    Text(
+                        text = "EcoMonitorApp",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Мониторинг экологии города",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                HorizontalDivider()
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    drawerItems.forEach { item ->
+                        NavigationDrawerItem(
+                            label = { Text(item.title) },
+                            icon = { Icon(item.icon, contentDescription = null) },
+                            selected = currentRoute?.startsWith(item.route) == true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(item.route) {
+                                    popUpTo("home")
+                                    launchSingleTop = true
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

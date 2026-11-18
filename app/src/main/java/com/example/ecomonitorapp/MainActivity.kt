@@ -24,14 +24,14 @@ import org.osmdroid.config.Configuration
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
         // инициализация конфигурации osmdroid
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         Configuration.getInstance().load(applicationContext, prefs)
         Configuration.getInstance().userAgentValue =
             "ViolationReport/1.0 (Android ${Build.VERSION.RELEASE}; contact@example.com)"
+
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             EcoMonitorAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
